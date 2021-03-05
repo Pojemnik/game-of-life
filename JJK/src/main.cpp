@@ -8,59 +8,11 @@
 #include <cstdlib>
 #include <ctime>
 
+#include "button.h"
+
 sf::Font font;
 
-class button
-{
-private:
-	sf::RectangleShape* rec;
-	sf::Text* text;
-	sf::Clock clock;
-	bool clicked = false;
-
-public:
-	sf::Vector2f size;
-	sf::Vector2f pos;
-	std::string name;
-	button(sf::Vector2f p, sf::Vector2f s, std::wstring txt, std::string n, std::vector<sf::Drawable*> &vect, int text_offsetx = 0, int text_offsety = 0) : pos(p), size(s), name(n)
-	{
-		rec = new sf::RectangleShape();
-		rec->setPosition(pos);
-		rec->setSize(size);
-		rec->setFillColor(sf::Color(255, 255, 255, 255));
-		rec->setOutlineThickness(1.0f);
-		rec->setOutlineColor(sf::Color(0, 0, 0, 255));
-		text = new sf::Text(txt, font, 30);
-		sf::FloatRect bounds = text->getLocalBounds();
-		text->setPosition(pos.x + (size.x - bounds.width - bounds.left) / 2 + text_offsetx, pos.y + (size.y - bounds.height - bounds.top) / 2 - 5 + text_offsety);
-		text->setFillColor(sf::Color(0, 0, 0, 255));
-		text->setStyle(sf::Text::Bold);
-		if (txt == L"▌▌" || txt == L"▶▌")
-			text->setCharacterSize(20);
-		vect.push_back(rec);
-		vect.push_back(text);
-	}
-
-	void click()
-	{
-		rec->setFillColor(sf::Color(102, 178, 255, 255));
-		text->setFillColor(sf::Color(255, 255, 255, 255));
-		clock.restart();
-		clicked = true;
-	}
-
-	void reset()
-	{
-		if (clicked && clock.getElapsedTime().asMilliseconds() >= 50)
-		{
-			rec->setFillColor(sf::Color(255, 255, 255, 255));
-			text->setFillColor(sf::Color(0, 0, 0, 255));
-			clicked = false;
-		}
-	}
-};
-
-class checkBox
+class CheckBox
 {
 private:
 	sf::RectangleShape* rec;
@@ -71,7 +23,7 @@ public:
 	std::string name;
 	sf::Vector2f size;
 
-	checkBox(sf::Vector2f p, std::vector<sf::Drawable*> &vect, bool c, std::string n) : pos(p), checked(c), name(n)
+	CheckBox(sf::Vector2f p, std::vector<sf::Drawable*> &vect, bool c, std::string n) : pos(p), checked(c), name(n)
 	{
 		rec = new sf::RectangleShape();
 		rec->setPosition(pos);
@@ -107,7 +59,7 @@ public:
 	}
 };
 
-class cell
+class Cell
 {
 
 private:
@@ -120,7 +72,7 @@ public:
 	sf::RectangleShape* rec;
 	bool state = false;
 
-	cell(sf::Vector2f pos, std::vector<sf::Drawable*> &vect)
+	Cell(sf::Vector2f pos, std::vector<sf::Drawable*> &vect)
 	{
 		rec = new sf::RectangleShape();
 		rec->setPosition(pos);
@@ -158,11 +110,11 @@ public:
 	}
 };
 
-class cellsMatrix
+class CellMatrix
 {
 private:
-	std::vector<std::vector<cell> > cells;
-	std::vector<std::vector<cell> > last_cells;
+	std::vector<std::vector<Cell> > cells;
+	std::vector<std::vector<Cell> > last_cells;
 	sf::Vector2f pos;
 	std::vector<sf::Drawable*>* v;
 	int** lifespan;
@@ -173,7 +125,7 @@ public:
 	std::set<int> live;
 	int gen;
 
-	cellsMatrix(sf::Vector2f p, int x, int y, std::vector<sf::Drawable*> &vect) : pos(p), v(&vect)
+	CellMatrix(sf::Vector2f p, int x, int y, std::vector<sf::Drawable*> &vect) : pos(p), v(&vect)
 	{
 		color = false;
 		resp.insert(3);
@@ -186,7 +138,7 @@ public:
 			lifespan[i] = new int[y];
 			for (int j = 0; j < y; j++)
 			{
-				cells[i].push_back(cell(sf::Vector2f(pos.x + 11 * i, pos.y + 11 * j), vect));
+				cells[i].push_back(Cell(sf::Vector2f(pos.x + 11 * i, pos.y + 11 * j), vect));
 				lifespan[i][j] = 0;
 			}
 		}
@@ -203,9 +155,9 @@ public:
 		int b = y;
 		while (a > 0)
 		{
-			std::vector<cell> temp;
+			std::vector<Cell> temp;
 			for (int i = 0; i < cells[0].size(); i++)
-				temp.push_back(cell(sf::Vector2f(pos.x + cells.size() * 11, pos.y + 11 * i), *v));
+				temp.push_back(Cell(sf::Vector2f(pos.x + cells.size() * 11, pos.y + 11 * i), *v));
 			cells.push_back(temp);
 			a--;
 		}
@@ -250,7 +202,7 @@ public:
 		while (b > 0)
 		{
 			for (int i = 0; i < cells.size(); i++)
-				cells[i].push_back(cell(sf::Vector2f(pos.x + i * 11, pos.y + 11 * cells[i].size()), *v));
+				cells[i].push_back(Cell(sf::Vector2f(pos.x + i * 11, pos.y + 11 * cells[i].size()), *v));
 			b--;
 		}
 		lifespan = new int*[cells.size()];
@@ -414,14 +366,14 @@ public:
 	}
 };
 
-class label
+class Label
 {
 
 private:
 	sf::Text* txt;
 
 public:
-	label(sf::Vector2f pos, std::vector<sf::Drawable*> &vect, std::wstring text, unsigned int size)
+	Label(sf::Vector2f pos, std::vector<sf::Drawable*> &vect, std::wstring text, unsigned int size)
 	{
 		txt = new sf::Text(text, font, size);
 		txt->setFillColor(sf::Color(0, 0, 0, 255));
@@ -436,7 +388,7 @@ public:
 	}
 };
 
-bool operator ==(const cell &a, const cell &b)
+bool operator ==(const Cell &a, const Cell &b)
 {
 	if (b.state == a.state)
 		return true;
@@ -450,39 +402,39 @@ int main()
 	std::vector<sf::Drawable*> vect;
 	font.loadFromFile("../lucida.ttf");
 	sf::RenderWindow window(sf::VideoMode(800, 450), "Game of life");
-	cellsMatrix matrix = cellsMatrix(sf::Vector2f(400, 60), 10, 10, vect);
-	std::vector<button> buttons;
-	std::vector<checkBox> check_boxes;
+	CellMatrix matrix = CellMatrix(sf::Vector2f(400, 60), 10, 10, vect);
+	std::vector<Button> buttons;
+	std::vector<CheckBox> check_boxes;
 	sf::Clock clock;
-	label speed_text = label(sf::Vector2f(10, 120), vect, L"SZYBKOŚĆ: " + std::to_wstring(speed), 20);
-	label rules_text = label(sf::Vector2f(10, 190), vect, L"ZASADY:", 20);
-	label life_text = label(sf::Vector2f(10, 220), vect, L"ŻYCIE:", 15);
-	label resp_text = label(sf::Vector2f(10, 270), vect, L"ODRADZANIE:", 15);
-	label color_text = label(sf::Vector2f(10, 350), vect, L"KOLOR:", 20);
-	check_boxes.push_back(checkBox(sf::Vector2f(10, 380), vect, false, "color"));
-	label gen_text = label(sf::Vector2f(10, 320), vect, L"POKOLENIE: " + std::to_wstring(matrix.gen), 15);
-	buttons.push_back(button(sf::Vector2f(400, 10), sf::Vector2f(30, 30), L"-", "removeX", vect, -1, -5));
-	buttons.push_back(button(sf::Vector2f(460, 10), sf::Vector2f(30, 30), L"+", "addX", vect, -1, 0));
-	buttons.push_back(button(sf::Vector2f(350, 60), sf::Vector2f(30, 30), L"-", "removeY", vect, -1, -5));
-	buttons.push_back(button(sf::Vector2f(350, 120), sf::Vector2f(30, 30), L"+", "addY", vect, -1, 0));
-	buttons.push_back(button(sf::Vector2f(10, 150), sf::Vector2f(30, 30), L"-", "remove_speed", vect, -1, -5));
-	buttons.push_back(button(sf::Vector2f(70, 150), sf::Vector2f(30, 30), L"+", "add_speed", vect, -1, 0));
-	buttons.push_back(button(sf::Vector2f(10, 10), sf::Vector2f(40, 40), L"▶", "start", vect));
-	buttons.push_back(button(sf::Vector2f(50, 10), sf::Vector2f(40, 40), L"■", "stop", vect, -1, 0));
-	buttons.push_back(button(sf::Vector2f(90, 10), sf::Vector2f(40, 40), L"▌▌", "pause", vect, 7, 9));
-	buttons.push_back(button(sf::Vector2f(130, 10), sf::Vector2f(40, 40), L"▶▌", "next", vect, 5, 10));
-	buttons.push_back(button(sf::Vector2f(10, 60), sf::Vector2f(120, 40), L"LOSUJ", "rand", vect, -3, 3));
+	Label speed_text = Label(sf::Vector2f(10, 120), vect, L"SZYBKOŚĆ: " + std::to_wstring(speed), 20);
+	Label rules_text = Label(sf::Vector2f(10, 190), vect, L"ZASADY:", 20);
+	Label life_text = Label(sf::Vector2f(10, 220), vect, L"ŻYCIE:", 15);
+	Label resp_text = Label(sf::Vector2f(10, 270), vect, L"ODRADZANIE:", 15);
+	Label color_text = Label(sf::Vector2f(10, 350), vect, L"KOLOR:", 20);
+	check_boxes.push_back(CheckBox(sf::Vector2f(10, 380), vect, false, "color"));
+	Label gen_text = Label(sf::Vector2f(10, 320), vect, L"POKOLENIE: " + std::to_wstring(matrix.gen), 15);
+	buttons.push_back(Button(sf::Vector2f(400, 10), sf::Vector2f(30, 30), L"-", "removeX", &font, sf::Vector2i(-1, -5)));
+	buttons.push_back(Button(sf::Vector2f(460, 10), sf::Vector2f(30, 30), L"+", "addX", &font, sf::Vector2i(-1, 0)));
+	buttons.push_back(Button(sf::Vector2f(350, 60), sf::Vector2f(30, 30), L"-", "removeY", &font, sf::Vector2i(-1, -5)));
+	buttons.push_back(Button(sf::Vector2f(350, 120), sf::Vector2f(30, 30), L"+", "addY", &font, sf::Vector2i(-1, 0)));
+	buttons.push_back(Button(sf::Vector2f(10, 150), sf::Vector2f(30, 30), L"-", "remove_speed", &font, sf::Vector2i(-1, -5)));
+	buttons.push_back(Button(sf::Vector2f(70, 150), sf::Vector2f(30, 30), L"+", "add_speed", &font, sf::Vector2i(-1, 0)));
+	buttons.push_back(Button(sf::Vector2f(10, 10), sf::Vector2f(40, 40), L"▶", "start", &font));
+	buttons.push_back(Button(sf::Vector2f(50, 10), sf::Vector2f(40, 40), L"■", "stop", &font, sf::Vector2i(-1, 0)));
+	buttons.push_back(Button(sf::Vector2f(90, 10), sf::Vector2f(40, 40), L"▌▌", "pause", &font, sf::Vector2i(7, 9)));
+	buttons.push_back(Button(sf::Vector2f(130, 10), sf::Vector2f(40, 40), L"▶▌", "next", &font, sf::Vector2i(5, 10)));
+	buttons.push_back(Button(sf::Vector2f(10, 60), sf::Vector2f(120, 40), L"LOSUJ", "rand", &font, sf::Vector2i(-3, 3)));
 	for (int i = 0; i <= 8; i++)
 	{
-		check_boxes.push_back(checkBox(sf::Vector2f(10 + i * 15, 255), vect, false, "life" + std::to_string(i)));
-		label(sf::Vector2f(13 + i * 15, 240), vect, std::to_wstring(i), 14);
+		check_boxes.push_back(CheckBox(sf::Vector2f(10 + i * 15, 255), vect, false, "life" + std::to_string(i)));
+		Label(sf::Vector2f(13 + i * 15, 240), vect, std::to_wstring(i), 14);
 		if (i == 2 || i == 3)
 			check_boxes.back().click();
 	}
 	for (int i = 0; i <= 8; i++)
 	{
-		check_boxes.push_back(checkBox(sf::Vector2f(10 + i * 15, 305), vect, false, "resp" + std::to_string(i)));
-		label(sf::Vector2f(13 + i * 15, 290), vect, std::to_wstring(i), 14);
+		check_boxes.push_back(CheckBox(sf::Vector2f(10 + i * 15, 305), vect, false, "resp" + std::to_string(i)));
+		Label(sf::Vector2f(13 + i * 15, 290), vect, std::to_wstring(i), 14);
 		if (i == 3)
 			check_boxes.back().click();
 	}
@@ -496,7 +448,7 @@ int main()
 				window.close();
 			if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
 			{
-				for (std::vector<button>::iterator it = buttons.begin(); it != buttons.end(); it++)
+				for (std::vector<Button>::iterator it = buttons.begin(); it != buttons.end(); it++)
 				{
 					if (event.mouseButton.x > it->pos.x && event.mouseButton.x < it->pos.x + it->size.x &&
 						event.mouseButton.y > it->pos.y && event.mouseButton.y < it->pos.y + it->size.y)
@@ -557,7 +509,7 @@ int main()
 						}
 					}
 				}
-				for (std::vector<checkBox>::iterator it = check_boxes.begin(); it != check_boxes.end(); it++)
+				for (std::vector<CheckBox>::iterator it = check_boxes.begin(); it != check_boxes.end(); it++)
 				{
 					if (event.mouseButton.x > it->pos.x && event.mouseButton.x < it->pos.x + it->size.x &&
 						event.mouseButton.y > it->pos.y && event.mouseButton.y < it->pos.y + it->size.y)
@@ -598,9 +550,15 @@ int main()
 		}
 		window.clear(sf::Color(255, 255, 255, 0));
 		for (std::vector<sf::Drawable*>::iterator it = vect.begin(); it != vect.end(); it++)
+		{
 			window.draw(**it);
+		}
+		for (const auto& it : buttons)
+		{
+			it.draw(window, sf::RenderStates());
+		}
 		window.display();
-		for (std::vector<button>::iterator it = buttons.begin(); it != buttons.end(); it++)
+		for (std::vector<Button>::iterator it = buttons.begin(); it != buttons.end(); it++)
 		{
 			it->reset();
 		}
