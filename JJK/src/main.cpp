@@ -9,55 +9,9 @@
 #include <ctime>
 
 #include "button.h"
+#include "checkbox.h"
 
 sf::Font font;
-
-class CheckBox
-{
-private:
-	sf::RectangleShape* rec;
-
-public:
-	bool checked;
-	sf::Vector2f pos;
-	std::string name;
-	sf::Vector2f size;
-
-	CheckBox(sf::Vector2f p, std::vector<sf::Drawable*> &vect, bool c, std::string n) : pos(p), checked(c), name(n)
-	{
-		rec = new sf::RectangleShape();
-		rec->setPosition(pos);
-		rec->setSize(sf::Vector2f(15, 15));
-		size = sf::Vector2f(15, 15);
-		if (c)
-		{
-			rec->setFillColor(sf::Color(0, 0, 0, 255));
-		}
-		else
-		{
-			rec->setFillColor(sf::Color(255, 255, 255, 255));
-			rec->setOutlineThickness(-1);
-			rec->setOutlineColor(sf::Color(0, 0, 0, 255));
-		}
-		vect.push_back(rec);
-	}
-
-	bool click()
-	{
-		checked = !checked;
-		if (checked)
-		{
-			rec->setFillColor(sf::Color(0, 0, 0, 255));
-		}
-		else
-		{
-			rec->setFillColor(sf::Color(255, 255, 255, 255));
-			rec->setOutlineThickness(-1);
-			rec->setOutlineColor(sf::Color(0, 0, 0, 255));
-		}
-		return checked;
-	}
-};
 
 class Cell
 {
@@ -404,36 +358,36 @@ int main()
 	sf::RenderWindow window(sf::VideoMode(800, 450), "Game of life");
 	CellMatrix matrix = CellMatrix(sf::Vector2f(400, 60), 10, 10, vect);
 	std::vector<Button> buttons;
-	std::vector<CheckBox> check_boxes;
+	std::vector<Checkbox> check_boxes;
 	sf::Clock clock;
 	Label speed_text = Label(sf::Vector2f(10, 120), vect, L"SZYBKOŚĆ: " + std::to_wstring(speed), 20);
 	Label rules_text = Label(sf::Vector2f(10, 190), vect, L"ZASADY:", 20);
 	Label life_text = Label(sf::Vector2f(10, 220), vect, L"ŻYCIE:", 15);
 	Label resp_text = Label(sf::Vector2f(10, 270), vect, L"ODRADZANIE:", 15);
 	Label color_text = Label(sf::Vector2f(10, 350), vect, L"KOLOR:", 20);
-	check_boxes.push_back(CheckBox(sf::Vector2f(10, 380), vect, false, "color"));
+	check_boxes.push_back(Checkbox(sf::Vector2f(10, 380), false, "color"));
 	Label gen_text = Label(sf::Vector2f(10, 320), vect, L"POKOLENIE: " + std::to_wstring(matrix.gen), 15);
-	buttons.push_back(Button(sf::Vector2f(400, 10), sf::Vector2f(30, 30), L"-", "removeX", &font, sf::Vector2i(-1, -5)));
-	buttons.push_back(Button(sf::Vector2f(460, 10), sf::Vector2f(30, 30), L"+", "addX", &font, sf::Vector2i(-1, 0)));
-	buttons.push_back(Button(sf::Vector2f(350, 60), sf::Vector2f(30, 30), L"-", "removeY", &font, sf::Vector2i(-1, -5)));
-	buttons.push_back(Button(sf::Vector2f(350, 120), sf::Vector2f(30, 30), L"+", "addY", &font, sf::Vector2i(-1, 0)));
-	buttons.push_back(Button(sf::Vector2f(10, 150), sf::Vector2f(30, 30), L"-", "remove_speed", &font, sf::Vector2i(-1, -5)));
-	buttons.push_back(Button(sf::Vector2f(70, 150), sf::Vector2f(30, 30), L"+", "add_speed", &font, sf::Vector2i(-1, 0)));
-	buttons.push_back(Button(sf::Vector2f(10, 10), sf::Vector2f(40, 40), L"▶", "start", &font));
-	buttons.push_back(Button(sf::Vector2f(50, 10), sf::Vector2f(40, 40), L"■", "stop", &font, sf::Vector2i(-1, 0)));
-	buttons.push_back(Button(sf::Vector2f(90, 10), sf::Vector2f(40, 40), L"▌▌", "pause", &font, sf::Vector2i(7, 9)));
-	buttons.push_back(Button(sf::Vector2f(130, 10), sf::Vector2f(40, 40), L"▶▌", "next", &font, sf::Vector2i(5, 10)));
-	buttons.push_back(Button(sf::Vector2f(10, 60), sf::Vector2f(120, 40), L"LOSUJ", "rand", &font, sf::Vector2i(-3, 3)));
+	buttons.push_back(Button(sf::Vector2f(400, 10), sf::Vector2f(30, 30), L"-", "removeX", font, sf::Vector2i(-1, -5)));
+	buttons.push_back(Button(sf::Vector2f(460, 10), sf::Vector2f(30, 30), L"+", "addX", font, sf::Vector2i(-1, 0)));
+	buttons.push_back(Button(sf::Vector2f(350, 60), sf::Vector2f(30, 30), L"-", "removeY", font, sf::Vector2i(-1, -5)));
+	buttons.push_back(Button(sf::Vector2f(350, 120), sf::Vector2f(30, 30), L"+", "addY", font, sf::Vector2i(-1, 0)));
+	buttons.push_back(Button(sf::Vector2f(10, 150), sf::Vector2f(30, 30), L"-", "remove_speed", font, sf::Vector2i(-1, -5)));
+	buttons.push_back(Button(sf::Vector2f(70, 150), sf::Vector2f(30, 30), L"+", "add_speed", font, sf::Vector2i(-1, 0)));
+	buttons.push_back(Button(sf::Vector2f(10, 10), sf::Vector2f(40, 40), L"▶", "start", font));
+	buttons.push_back(Button(sf::Vector2f(50, 10), sf::Vector2f(40, 40), L"■", "stop", font, sf::Vector2i(-1, 0)));
+	buttons.push_back(Button(sf::Vector2f(90, 10), sf::Vector2f(40, 40), L"▌▌", "pause", font, sf::Vector2i(7, 9)));
+	buttons.push_back(Button(sf::Vector2f(130, 10), sf::Vector2f(40, 40), L"▶▌", "next", font, sf::Vector2i(5, 10)));
+	buttons.push_back(Button(sf::Vector2f(10, 60), sf::Vector2f(120, 40), L"LOSUJ", "rand", font, sf::Vector2i(-3, 3)));
 	for (int i = 0; i <= 8; i++)
 	{
-		check_boxes.push_back(CheckBox(sf::Vector2f(10 + i * 15, 255), vect, false, "life" + std::to_string(i)));
+		check_boxes.push_back(Checkbox(sf::Vector2f(10 + i * 15, 255), false, "life" + std::to_string(i)));
 		Label(sf::Vector2f(13 + i * 15, 240), vect, std::to_wstring(i), 14);
 		if (i == 2 || i == 3)
 			check_boxes.back().click();
 	}
 	for (int i = 0; i <= 8; i++)
 	{
-		check_boxes.push_back(CheckBox(sf::Vector2f(10 + i * 15, 305), vect, false, "resp" + std::to_string(i)));
+		check_boxes.push_back(Checkbox(sf::Vector2f(10 + i * 15, 305), false, "resp" + std::to_string(i)));
 		Label(sf::Vector2f(13 + i * 15, 290), vect, std::to_wstring(i), 14);
 		if (i == 3)
 			check_boxes.back().click();
@@ -450,8 +404,8 @@ int main()
 			{
 				for (std::vector<Button>::iterator it = buttons.begin(); it != buttons.end(); it++)
 				{
-					if (event.mouseButton.x > it->pos.x && event.mouseButton.x < it->pos.x + it->size.x &&
-						event.mouseButton.y > it->pos.y && event.mouseButton.y < it->pos.y + it->size.y)
+					if (event.mouseButton.x > it->position.x && event.mouseButton.x < it->position.x + it->size.x &&
+						event.mouseButton.y > it->position.y && event.mouseButton.y < it->position.y + it->size.y)
 					{
 						std::string name = it->name;
 						it->click();
@@ -509,10 +463,10 @@ int main()
 						}
 					}
 				}
-				for (std::vector<CheckBox>::iterator it = check_boxes.begin(); it != check_boxes.end(); it++)
+				for (std::vector<Checkbox>::iterator it = check_boxes.begin(); it != check_boxes.end(); it++)
 				{
-					if (event.mouseButton.x > it->pos.x && event.mouseButton.x < it->pos.x + it->size.x &&
-						event.mouseButton.y > it->pos.y && event.mouseButton.y < it->pos.y + it->size.y)
+					if (event.mouseButton.x > it->position.x && event.mouseButton.x < it->position.x + it->size.x &&
+						event.mouseButton.y > it->position.y && event.mouseButton.y < it->position.y + it->size.y)
 					{
 						if (it->click())
 						{
@@ -554,6 +508,10 @@ int main()
 			window.draw(**it);
 		}
 		for (const auto& it : buttons)
+		{
+			it.draw(window, sf::RenderStates());
+		}
+		for (const auto& it : check_boxes)
 		{
 			it.draw(window, sf::RenderStates());
 		}
