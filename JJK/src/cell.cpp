@@ -39,3 +39,10 @@ void Cell::set_color(int color)
 			rect.setFillColor(colors[color]);
 	}
 }
+
+bool operator ==(const Cell& a, const Cell& b)
+{
+	if (b.state == a.state)
+		return true;
+	return false;
+}

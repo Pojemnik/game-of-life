@@ -18,3 +18,5 @@ public:
 	void click();
 	void set_color(int color);
 };
+
+bool operator ==(const Cell& a, const Cell& b);

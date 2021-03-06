@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-class Checkbox : sf::Drawable
+class Checkbox : public sf::Drawable
 {
 private:
 	sf::RectangleShape rect;

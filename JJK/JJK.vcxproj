@@ -21,12 +21,14 @@
   <ItemGroup>
     <ClCompile Include="src\button.cpp" />
     <ClCompile Include="src\cell.cpp" />
+    <ClCompile Include="src\cellmatrix.cpp" />
     <ClCompile Include="src\checkbox.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\button.h" />
     <ClInclude Include="src\cell.h" />
+    <ClInclude Include="src\cellmatrix.h" />
     <ClInclude Include="src\checkbox.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

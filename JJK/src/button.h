@@ -2,7 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <string>
 
-class Button : sf::Drawable
+class Button : public sf::Drawable
 {
 private:
 	sf::RectangleShape rect;

@@ -10,265 +10,9 @@
 
 #include "button.h"
 #include "checkbox.h"
-#include "cell.h"
+#include "cellmatrix.h"
 
 sf::Font font;
-
-class CellMatrix
-{
-private:
-	std::vector<std::vector<Cell> > cells;
-	std::vector<std::vector<Cell> > last_cells;
-	sf::Vector2f pos;
-	std::vector<sf::Drawable*>* v;
-	int** lifespan;
-	bool color;
-
-public:
-	std::set<int> resp;
-	std::set<int> live;
-	int gen;
-
-	CellMatrix(sf::Vector2f p, int x, int y, std::vector<sf::Drawable*> &vect) : pos(p), v(&vect)
-	{
-		color = false;
-		resp.insert(3);
-		live.insert(2);
-		live.insert(3);
-		cells.resize(x);
-		lifespan = new int*[x];
-		for (int i = 0; i < x; i++)
-		{
-			lifespan[i] = new int[y];
-			for (int j = 0; j < y; j++)
-			{
-				cells[i].push_back(Cell(sf::Vector2f(pos.x + 11 * i, pos.y + 11 * j), vect));
-				lifespan[i][j] = 0;
-			}
-		}
-		gen = 0;
-	}
-
-	void change_size(int x, int y, std::vector<sf::Drawable*> &vect)
-	{
-		if (cells.size() + x > 35 || cells[0].size() + y > 35 ||
-			cells.size() + x < 5 || cells[0].size() + y < 5)
-			return;
-		delete[] lifespan;
-		int a = x;
-		int b = y;
-		while (a > 0)
-		{
-			std::vector<Cell> temp;
-			for (int i = 0; i < cells[0].size(); i++)
-				temp.push_back(Cell(sf::Vector2f(pos.x + cells.size() * 11, pos.y + 11 * i), *v));
-			cells.push_back(temp);
-			a--;
-		}
-		while (a < 0)
-		{
-			int x = cells[0].size();
-			for (int i = 0; i < x; i++)
-			{
-				std::vector<sf::Drawable*>::iterator it = vect.begin();
-				while (it != vect.end())
-				{
-					if (*it == cells[cells.size() - 1][i].rect)
-					{
-						vect.erase(it);
-						break;
-					}
-					it++;
-				}
-			}
-			cells.pop_back();
-			a++;
-		}
-		while (b < 0)
-		{
-			int x = cells.size();
-			for (int i = 0; i < x; i++)
-			{
-				std::vector<sf::Drawable*>::iterator it = vect.begin();
-				while (it != vect.end())
-				{
-					if (*it == cells[i][cells[i].size() - 1].rect)
-					{
-						vect.erase(it);
-						break;
-					}
-					it++;
-				}
-				cells[i].pop_back();
-			}
-			b++;
-		}
-		while (b > 0)
-		{
-			for (int i = 0; i < cells.size(); i++)
-				cells[i].push_back(Cell(sf::Vector2f(pos.x + i * 11, pos.y + 11 * cells[i].size()), *v));
-			b--;
-		}
-		lifespan = new int*[cells.size()];
-		for (int i = 0; i < cells.size(); i++)
-		{
-			lifespan[i] = new int[cells[0].size()];
-			for (int j = 0; j < cells[0].size(); j++)
-				lifespan[i][j] = 0;
-		}
-	}
-
-	void check_clicked(sf::Event::MouseButtonEvent mouse)
-	{
-		if (mouse.x > cells[0][0].rect->getPosition().x && mouse.y > cells[0][0].rect->getPosition().y &&
-			mouse.x < cells[cells.size() - 1][cells[0].size() - 1].rect->getPosition().x + cells[cells.size() - 1][cells[0].size() - 1].rect->getSize().x &&
-			mouse.y < cells[cells.size() - 1][cells[0].size() - 1].rect->getPosition().y + cells[cells.size() - 1][cells[0].size() - 1].rect->getSize().y)
-		{
-			for (int i = 0; i < cells.size(); i++)
-			{
-				for (int j = 0; j < cells[i].size(); j++)
-				{
-					sf::Vector2f p = cells[i][j].rect->getPosition();
-					sf::Vector2f s = cells[i][j].rect->getSize();
-					if (mouse.x > p.x && mouse.x < p.x + s.x && mouse.y > p.y && mouse.y < p.y + s.y)
-						cells[i][j].click();
-				}
-			}
-		}
-	}
-
-	bool step()
-	{
-		int** n;
-		n = new int*[cells.size()];
-		for (int i = 0; i < cells.size(); i++)
-		{
-			n[i] = new int[cells[0].size()];
-			for (int j = 0; j < cells[0].size(); j++)
-				n[i][j] = 0;
-		}
-		for (int i = 0; i < cells.size(); i++)
-		{
-			for (int j = 0; j < cells[0].size(); j++)
-			{
-				if (cells[i][j].state)
-				{
-					if (i < cells.size() - 1)
-					{
-						n[i + 1][j]++;
-					}
-					if (j < cells[0].size() - 1)
-					{
-						n[i][j + 1]++;
-						if (i < cells.size() - 1)
-						{
-							n[i + 1][j + 1]++;
-						}
-					}
-					if (i - 1 >= 0)
-					{
-						n[i - 1][j]++;
-					}
-					if (j - 1 >= 0)
-					{
-						n[i][j - 1]++;
-						if (i - 1 >= 0)
-						{
-							n[i - 1][j - 1]++;
-						}
-					}
-					if (i < cells.size() - 1 && j - 1 >= 0)
-					{
-						n[i + 1][j - 1]++;
-					}
-					if (j < cells[0].size() - 1 && i - 1 >= 0)
-					{
-						n[i - 1][j + 1]++;
-					}
-				}
-			}
-		}
-		for (int i = 0; i < cells.size(); i++)
-		{
-			for (int j = 0; j < cells[0].size(); j++)
-			{
-				if (cells[i][j].state)
-				{
-					lifespan[i][j]++;
-					if (color)
-						cells[i][j].set_color((lifespan[i][j] - 1) % 12);
-					if (!live.count(n[i][j]))
-						cells[i][j].click();
-				}
-				else
-				{
-					lifespan[i][j] = 0;
-					if (resp.count(n[i][j]))
-						cells[i][j].click();
-				}
-			}
-		}
-		if (last_cells == cells)
-			return 0;
-		last_cells = cells;
-		delete[] n;
-		gen++;
-		return 1;
-	}
-
-	void clear()
-	{
-		delete[] lifespan;
-		gen = 0;
-		for (int i = 0; i < cells.size(); i++)
-		{
-			for (int j = 0; j < cells[0].size(); j++)
-			{
-				if (cells[i][j].state)
-					cells[i][j].click();
-			}
-		}
-		lifespan = new int*[cells.size()];
-		for (int i = 0; i < cells.size(); i++)
-		{
-			lifespan[i] = new int[cells[0].size()];
-			for (int j = 0; j < cells[0].size(); j++)
-				lifespan[i][j] = 0;
-		}
-	}
-
-	void random()
-	{
-		srand(time(NULL));
-		this->clear();
-		for (int i = 0; i < cells.size(); i++)
-		{
-			for (int j = 0; j < cells[0].size(); j++)
-			{
-				if (rand() % 2)
-				{
-					cells[i][j].click();
-				}
-			}
-		}
-	}
-
-	void colors(bool state)
-	{
-		color = state;
-		if (!state)
-		{
-			for (int i = 0; i < cells.size(); i++)
-			{
-				for (int j = 0; j < cells[0].size(); j++)
-				{
-					if (cells[i][j].state)
-						cells[i][j].set_color(-1);
-				}
-			}
-		}
-	}
-};
 
 class Label
 {
@@ -292,13 +36,6 @@ public:
 	}
 };
 
-bool operator ==(const Cell &a, const Cell &b)
-{
-	if (b.state == a.state)
-		return true;
-	return false;
-}
-
 int main()
 {
 	bool go = false;
@@ -306,7 +43,7 @@ int main()
 	std::vector<sf::Drawable*> vect;
 	font.loadFromFile("../lucida.ttf");
 	sf::RenderWindow window(sf::VideoMode(800, 450), "Game of life");
-	CellMatrix matrix = CellMatrix(sf::Vector2f(400, 60), 10, 10, vect);
+	CellMatrix matrix = CellMatrix(sf::Vector2f(400, 60), 10, 10);
 	std::vector<Button> buttons;
 	std::vector<Checkbox> check_boxes;
 	sf::Clock clock;
@@ -361,19 +98,19 @@ int main()
 						it->click();
 						if (name == "removeX")
 						{
-							matrix.change_size(-1, 0, vect);
+							matrix.change_size(-1, 0);
 						}
 						else if (name == "addX")
 						{
-							matrix.change_size(1, 0, vect);
+							matrix.change_size(1, 0);
 						}
 						else if (name == "addY")
 						{
-							matrix.change_size(0, 1, vect);
+							matrix.change_size(0, 1);
 						}
 						else if (name == "removeY")
 						{
-							matrix.change_size(0, -1, vect);
+							matrix.change_size(0, -1);
 						}
 						else if (name == "start")
 						{
@@ -453,6 +190,7 @@ int main()
 			clock.restart();
 		}
 		window.clear(sf::Color(255, 255, 255, 0));
+		window.draw(matrix, sf::RenderStates());
 		for (std::vector<sf::Drawable*>::iterator it = vect.begin(); it != vect.end(); it++)
 		{
 			window.draw(**it);
