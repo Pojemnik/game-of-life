@@ -10,59 +10,9 @@
 
 #include "button.h"
 #include "checkbox.h"
+#include "cell.h"
 
 sf::Font font;
-
-class Cell
-{
-
-private:
-	sf::Color colors[12] = { sf::Color(255,0,0,255), sf::Color(255,128,0,255), sf::Color(255,255,0,255),
-	sf::Color(128,255,0,255), sf::Color(0,255,0,255), sf::Color(0, 255, 128,255), sf::Color(0,255,255,255),
-	sf::Color(0, 128, 255,255), sf::Color(0, 0, 255,255), sf::Color(128, 0, 255,255), sf::Color(255, 0, 255,255),
-	sf::Color(255, 0, 128,255) };
-
-public:
-	sf::RectangleShape* rec;
-	bool state = false;
-
-	Cell(sf::Vector2f pos, std::vector<sf::Drawable*> &vect)
-	{
-		rec = new sf::RectangleShape();
-		rec->setPosition(pos);
-		rec->setSize(sf::Vector2f(10, 10));
-		rec->setFillColor(sf::Color(255, 255, 255, 255));
-		rec->setOutlineThickness(-1);
-		rec->setOutlineColor(sf::Color(0, 0, 0, 255));
-		vect.push_back(rec);
-	}
-
-	void click()
-	{
-		state = !state;
-		if (state)
-		{
-			rec->setFillColor(sf::Color(0, 0, 0, 255));
-		}
-		else
-		{
-			rec->setFillColor(sf::Color(255, 255, 255, 255));
-			rec->setOutlineThickness(-1);
-			rec->setOutlineColor(sf::Color(0, 0, 0, 255));
-		}
-	}
-
-	void set_color(int color)
-	{
-		if (color == -1)
-			rec->setFillColor(sf::Color(0, 0, 0, 255));
-		else
-		{
-			if (color > -1 && color < 12)
-				rec->setFillColor(colors[color]);
-		}
-	}
-};
 
 class CellMatrix
 {
@@ -123,7 +73,7 @@ public:
 				std::vector<sf::Drawable*>::iterator it = vect.begin();
 				while (it != vect.end())
 				{
-					if (*it == cells[cells.size() - 1][i].rec)
+					if (*it == cells[cells.size() - 1][i].rect)
 					{
 						vect.erase(it);
 						break;
@@ -142,7 +92,7 @@ public:
 				std::vector<sf::Drawable*>::iterator it = vect.begin();
 				while (it != vect.end())
 				{
-					if (*it == cells[i][cells[i].size() - 1].rec)
+					if (*it == cells[i][cells[i].size() - 1].rect)
 					{
 						vect.erase(it);
 						break;
@@ -170,16 +120,16 @@ public:
 
 	void check_clicked(sf::Event::MouseButtonEvent mouse)
 	{
-		if (mouse.x > cells[0][0].rec->getPosition().x && mouse.y > cells[0][0].rec->getPosition().y &&
-			mouse.x < cells[cells.size() - 1][cells[0].size() - 1].rec->getPosition().x + cells[cells.size() - 1][cells[0].size() - 1].rec->getSize().x &&
-			mouse.y < cells[cells.size() - 1][cells[0].size() - 1].rec->getPosition().y + cells[cells.size() - 1][cells[0].size() - 1].rec->getSize().y)
+		if (mouse.x > cells[0][0].rect->getPosition().x && mouse.y > cells[0][0].rect->getPosition().y &&
+			mouse.x < cells[cells.size() - 1][cells[0].size() - 1].rect->getPosition().x + cells[cells.size() - 1][cells[0].size() - 1].rect->getSize().x &&
+			mouse.y < cells[cells.size() - 1][cells[0].size() - 1].rect->getPosition().y + cells[cells.size() - 1][cells[0].size() - 1].rect->getSize().y)
 		{
 			for (int i = 0; i < cells.size(); i++)
 			{
 				for (int j = 0; j < cells[i].size(); j++)
 				{
-					sf::Vector2f p = cells[i][j].rec->getPosition();
-					sf::Vector2f s = cells[i][j].rec->getSize();
+					sf::Vector2f p = cells[i][j].rect->getPosition();
+					sf::Vector2f s = cells[i][j].rect->getSize();
 					if (mouse.x > p.x && mouse.x < p.x + s.x && mouse.y > p.y && mouse.y < p.y + s.y)
 						cells[i][j].click();
 				}
