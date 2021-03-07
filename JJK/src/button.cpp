@@ -2,7 +2,7 @@
 
 Button::Button(sf::Vector2f position_, sf::Vector2f size_, std::wstring content, std::string name_,
 	sf::Font& font, sf::Vector2i text_offset) : position(position_), size(size_), name(name_),
-	text(content, font, 30)
+	text(content, font, 25)
 {
 	rect.setPosition(position);
 	rect.setSize(size);

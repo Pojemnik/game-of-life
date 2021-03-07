@@ -14,6 +14,7 @@
 #include "label.h"
 
 const int DEFAULT_SPEED = 10;
+const sf::Vector2u WINDOW_SIZE = sf::Vector2u(640, 450);
 
 int main()
 {
@@ -21,47 +22,54 @@ int main()
 	bool go = false;
 	int speed = DEFAULT_SPEED;
 	font.loadFromFile("../lucida.ttf");
-	sf::RenderWindow window(sf::VideoMode(800, 450), "Game of life");
-	CellMatrix matrix = CellMatrix(sf::Vector2f(400, 60), sf::Vector2i(10, 10));
+	sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE.x, WINDOW_SIZE.y), "Game of life");
 	std::vector<const sf::Drawable*> drawables;
 	std::vector<Button> buttons;
 	std::vector<Checkbox> check_boxes;
 	sf::Clock clock;
-	Label speed_text = Label(sf::Vector2f(10, 120), L"SZYBKOŚĆ: " + std::to_wstring(speed), 20, font);
+	CellMatrix matrix = CellMatrix(sf::Vector2f(250, 60), sf::Vector2i(10, 10));
+	drawables.push_back(&matrix);
+	Label speed_text = Label(sf::Vector2f(10, 115), "Speed: " + std::to_string(speed), 15, font);
 	drawables.push_back(&speed_text);
-	Label rules_text = Label(sf::Vector2f(10, 190), L"ZASADY:", 20, font);
+	Label rules_text = Label(sf::Vector2f(10, 190), "Rules:", 20, font);
 	drawables.push_back(&rules_text);
-	Label life_text = Label(sf::Vector2f(10, 220), L"ŻYCIE:", 15, font);
+	Label life_text = Label(sf::Vector2f(10, 220), "Living:", 15, font);
 	drawables.push_back(&life_text);
-	Label resp_text = Label(sf::Vector2f(10, 270), L"ODRADZANIE:", 15, font);
+	Label resp_text = Label(sf::Vector2f(10, 280), "Spawn:", 15, font);
 	drawables.push_back(&resp_text);
-	Label color_text = Label(sf::Vector2f(10, 350), L"KOLOR:", 20, font);
+	Label color_text = Label(sf::Vector2f(10, 390), "Color:", 20, font);
 	drawables.push_back(&color_text);
-	Label gen_text = Label(sf::Vector2f(10, 320), L"POKOLENIE: " + std::to_wstring(matrix.generation_counter), 15, font);
+	Label gen_text = Label(sf::Vector2f(10, 350), "Generation: " + std::to_string(matrix.generation_counter), 15, font);
 	drawables.push_back(&gen_text);
-	check_boxes.push_back(Checkbox(sf::Vector2f(10, 380), false, "color"));
-	buttons.push_back(Button(sf::Vector2f(400, 10), sf::Vector2f(30, 30), L"-", "removeX", font, sf::Vector2i(-1, -5)));
-	buttons.push_back(Button(sf::Vector2f(460, 10), sf::Vector2f(30, 30), L"+", "addX", font, sf::Vector2i(-1, 0)));
-	buttons.push_back(Button(sf::Vector2f(350, 60), sf::Vector2f(30, 30), L"-", "removeY", font, sf::Vector2i(-1, -5)));
-	buttons.push_back(Button(sf::Vector2f(350, 120), sf::Vector2f(30, 30), L"+", "addY", font, sf::Vector2i(-1, 0)));
-	buttons.push_back(Button(sf::Vector2f(10, 150), sf::Vector2f(30, 30), L"-", "remove_speed", font, sf::Vector2i(-1, -5)));
-	buttons.push_back(Button(sf::Vector2f(70, 150), sf::Vector2f(30, 30), L"+", "add_speed", font, sf::Vector2i(-1, 0)));
+	check_boxes.push_back(Checkbox(sf::Vector2f(80, 395), false, "color"));
+	buttons.push_back(Button(sf::Vector2f(250, 10), sf::Vector2f(30, 30), L"-", "removeX", font, sf::Vector2i(-1, -3)));
+	buttons.push_back(Button(sf::Vector2f(310, 10), sf::Vector2f(30, 30), L"+", "addX", font, sf::Vector2i(-1, 0)));
+	buttons.push_back(Button(sf::Vector2f(200, 60), sf::Vector2f(30, 30), L"-", "removeY", font, sf::Vector2i(-1, -3)));
+	buttons.push_back(Button(sf::Vector2f(200, 120), sf::Vector2f(30, 30), L"+", "addY", font, sf::Vector2i(-1, 0)));
+	buttons.push_back(Button(sf::Vector2f(10, 140), sf::Vector2f(30, 30), L"-", "remove_speed", font, sf::Vector2i(-1, -3)));
+	buttons.push_back(Button(sf::Vector2f(70, 140), sf::Vector2f(30, 30), L"+", "add_speed", font, sf::Vector2i(-1, 0)));
 	buttons.push_back(Button(sf::Vector2f(10, 10), sf::Vector2f(40, 40), L"▶", "start", font));
 	buttons.push_back(Button(sf::Vector2f(50, 10), sf::Vector2f(40, 40), L"■", "stop", font, sf::Vector2i(-1, 0)));
 	buttons.push_back(Button(sf::Vector2f(90, 10), sf::Vector2f(40, 40), L"▌▌", "pause", font, sf::Vector2i(7, 9)));
 	buttons.push_back(Button(sf::Vector2f(130, 10), sf::Vector2f(40, 40), L"▶▌", "next", font, sf::Vector2i(5, 10)));
-	buttons.push_back(Button(sf::Vector2f(10, 60), sf::Vector2f(120, 40), L"LOSUJ", "rand", font, sf::Vector2i(-3, 3)));
+	buttons.push_back(Button(sf::Vector2f(10, 60), sf::Vector2f(120, 40), L"Random", "rand", font, sf::Vector2i(-3, 3)));
+	const int LINE_X = 180;
+	sf::VertexBuffer line(sf::PrimitiveType::Lines, sf::VertexBuffer::Usage::Static);
+	line.create(2);
+	std::vector<sf::Vertex> vertices = { sf::Vertex(sf::Vector2f(LINE_X, 0), sf::Color::Black),  sf::Vertex(sf::Vector2f(LINE_X, WINDOW_SIZE.y), sf::Color::Black), };
+	line.update(vertices.data());
+	drawables.push_back(&line);
 	for (int i = 0; i <= 8; i++)
 	{
 		check_boxes.push_back(Checkbox(sf::Vector2f(10 + i * 15, 255), false, "life" + std::to_string(i)));
-		drawables.push_back(new Label(sf::Vector2f(13 + i * 15, 240), std::to_wstring(i), 14, font));
+		drawables.push_back(new Label(sf::Vector2f(13 + i * 15, 240), std::to_string(i), 14, font));
 		if (i == 2 || i == 3)
 			check_boxes.back().click();
 	}
 	for (int i = 0; i <= 8; i++)
 	{
-		check_boxes.push_back(Checkbox(sf::Vector2f(10 + i * 15, 305), false, "resp" + std::to_string(i)));
-		drawables.push_back(new Label(sf::Vector2f(13 + i * 15, 290), std::to_wstring(i), 14, font));
+		check_boxes.push_back(Checkbox(sf::Vector2f(10 + i * 15, 315), false, "resp" + std::to_string(i)));
+		drawables.push_back(new Label(sf::Vector2f(13 + i * 15, 300), std::to_string(i), 14, font));
 		if (i == 3)
 			check_boxes.back().click();
 	}
@@ -117,7 +125,7 @@ int main()
 						{
 							go = false;
 							matrix.clear();
-							gen_text.set_string(L"POKOLENIE: " + std::to_wstring(matrix.generation_counter));
+							gen_text.set_string("Generation: " + std::to_string(matrix.generation_counter));
 						}
 						else if (name == "rand")
 						{
@@ -127,19 +135,19 @@ int main()
 						{
 							if (++speed > 20)
 								speed--;
-							speed_text.set_string(L"SZYBKOŚĆ: " + std::to_wstring(speed));
+							speed_text.set_string("Speed: " + std::to_string(speed));
 						}
 						else if (name == "remove_speed")
 						{
 							if (--speed < 1)
 								speed++;
-							speed_text.set_string(L"SZYBKOŚĆ: " + std::to_wstring(speed));
+							speed_text.set_string("Speed: " + std::to_string(speed));
 						}
 						else if (name == "next")
 						{
 							if (!matrix.step())
 								go = 0;
-							gen_text.set_string(L"POKOLENIE: " + std::to_wstring(matrix.generation_counter));
+							gen_text.set_string("Generation: " + std::to_string(matrix.generation_counter));
 						}
 					}
 				}
@@ -179,12 +187,11 @@ int main()
 		{
 			if (!matrix.step())
 				go = 0;
-			gen_text.set_string(L"POKOLENIE: " + std::to_wstring(matrix.generation_counter));
+			gen_text.set_string("Generation: " + std::to_string(matrix.generation_counter));
 			clock.restart();
 		}
 		window.clear(sf::Color::White);
 		//Drawing
-		window.draw(matrix, sf::RenderStates());
 		for (const auto& it : drawables)
 		{
 			window.draw(*it, sf::RenderStates());
