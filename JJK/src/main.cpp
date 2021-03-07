@@ -43,7 +43,7 @@ int main()
 	std::vector<sf::Drawable*> vect;
 	font.loadFromFile("../lucida.ttf");
 	sf::RenderWindow window(sf::VideoMode(800, 450), "Game of life");
-	CellMatrix matrix = CellMatrix(sf::Vector2f(400, 60), 10, 10);
+	CellMatrix matrix = CellMatrix(sf::Vector2f(400, 60), sf::Vector2i(10, 10));
 	std::vector<Button> buttons;
 	std::vector<Checkbox> check_boxes;
 	sf::Clock clock;
@@ -53,7 +53,7 @@ int main()
 	Label resp_text = Label(sf::Vector2f(10, 270), vect, L"ODRADZANIE:", 15);
 	Label color_text = Label(sf::Vector2f(10, 350), vect, L"KOLOR:", 20);
 	check_boxes.push_back(Checkbox(sf::Vector2f(10, 380), false, "color"));
-	Label gen_text = Label(sf::Vector2f(10, 320), vect, L"POKOLENIE: " + std::to_wstring(matrix.gen), 15);
+	Label gen_text = Label(sf::Vector2f(10, 320), vect, L"POKOLENIE: " + std::to_wstring(matrix.generation_counter), 15);
 	buttons.push_back(Button(sf::Vector2f(400, 10), sf::Vector2f(30, 30), L"-", "removeX", font, sf::Vector2i(-1, -5)));
 	buttons.push_back(Button(sf::Vector2f(460, 10), sf::Vector2f(30, 30), L"+", "addX", font, sf::Vector2i(-1, 0)));
 	buttons.push_back(Button(sf::Vector2f(350, 60), sf::Vector2f(30, 30), L"-", "removeY", font, sf::Vector2i(-1, -5)));
@@ -124,7 +124,7 @@ int main()
 						{
 							go = false;
 							matrix.clear();
-							gen_text.setString(L"POKOLENIE: " + std::to_wstring(matrix.gen));
+							gen_text.setString(L"POKOLENIE: " + std::to_wstring(matrix.generation_counter));
 						}
 						else if (name == "rand")
 						{
@@ -146,7 +146,7 @@ int main()
 						{
 							if (!matrix.step())
 								go = 0;
-							gen_text.setString(L"POKOLENIE: " + std::to_wstring(matrix.gen));
+							gen_text.setString(L"POKOLENIE: " + std::to_wstring(matrix.generation_counter));
 						}
 					}
 				}
@@ -158,7 +158,7 @@ int main()
 						if (it->click())
 						{
 							if (it->name.substr(0, 4) == "life")
-								matrix.live.insert(it->name[4] - '0');
+								matrix.life.insert(it->name[4] - '0');
 							else if (it->name.substr(0, 4) == "resp")
 								matrix.resp.insert(it->name[4] - '0');
 							else if (it->name == "color")
@@ -169,7 +169,7 @@ int main()
 						else
 						{
 							if (it->name.substr(0, 4) == "life")
-								matrix.live.erase(it->name[4] - '0');
+								matrix.life.erase(it->name[4] - '0');
 							else if (it->name.substr(0, 4) == "resp")
 								matrix.resp.erase(it->name[4] - '0');
 							else if (it->name == "color")
@@ -186,7 +186,7 @@ int main()
 		{
 			if (!matrix.step())
 				go = 0;
-			gen_text.setString(L"POKOLENIE: " + std::to_wstring(matrix.gen));
+			gen_text.setString(L"POKOLENIE: " + std::to_wstring(matrix.generation_counter));
 			clock.restart();
 		}
 		window.clear(sf::Color(255, 255, 255, 0));

@@ -1,22 +1,58 @@
 #include "cellmatrix.h"
 
-CellMatrix::CellMatrix(sf::Vector2f p, int x, int y) : pos(p)
+std::vector<std::vector<int>> CellMatrix::calculate_neighbours()
 {
-	color = false;
-	resp.insert(3);
-	live.insert(2);
-	live.insert(3);
-	cells.resize(x);
-	std::vector<int> temp(y, 0);
-	for (int i = 0; i < x; i++)
+	std::vector<std::vector<int>> neighbours;
+	std::vector<int> temp(cells[0].size(), 0);
+	for (int i = 0; i < cells.size(); i++)
 	{
-		lifespan.push_back(temp);
-		for (int j = 0; j < y; j++)
+		neighbours.push_back(temp);
+	}
+	const int delta_x[] = { -1, 0, 1, -1, 1, -1, 0, 1 };
+	const int delta_y[] = { -1, -1, -1, 0, 0, 1, 1, 1 };
+	for (int i = 0; i < cells.size(); i++)
+	{
+		for (int j = 0; j < cells[0].size(); j++)
 		{
-			cells[i].push_back(Cell(sf::Vector2f(pos.x + 11 * i, pos.y + 11 * j)));
+			if (!cells[i][j].state)
+			{
+				continue;
+			}
+			for (int k = 0; k < 8; k++)
+			{
+				int x = i + delta_x[k];
+				int y = j + delta_y[k];
+				if (x < 0 || x >= cells.size())
+					continue;
+				if (y < 0 || y >= cells[0].size())
+					continue;
+				neighbours[x][y]++;
+			}
 		}
 	}
-	generation = 0;
+	return neighbours;
+}
+
+CellMatrix::CellMatrix(sf::Vector2f position_, sf::Vector2i size) : position(position_),
+	generation_counter(0), color(false), cells(size.x)
+{
+	for (const auto& it : DEFAULT_RESP_VALUES)
+	{
+		resp.insert(it);
+	}
+	for (const auto& it : DEFAULT_LIFE_VALUES)
+	{
+		life.insert(it);
+	}
+	std::vector<int> temp(size.y, 0);
+	for (int i = 0; i < size.x; i++)
+	{
+		lifespan.push_back(temp);
+		for (int j = 0; j < size.y; j++)
+		{
+			cells[i].push_back(Cell(sf::Vector2f(position.x + 11 * i, position.y + 11 * j)));
+		}
+	}
 }
 
 void CellMatrix::change_size(sf::Vector2i diff)
@@ -28,7 +64,7 @@ void CellMatrix::change_size(sf::Vector2i diff)
 	{
 		std::vector<Cell> temp;
 		for (int i = 0; i < cells[0].size(); i++)
-			temp.push_back(Cell(sf::Vector2f(pos.x + cells.size() * 11, pos.y + 11 * i)));
+			temp.push_back(Cell(sf::Vector2f(position.x + cells.size() * 11, position.y + 11 * i)));
 		cells.push_back(temp);
 		diff.x--;
 	}
@@ -49,7 +85,7 @@ void CellMatrix::change_size(sf::Vector2i diff)
 	while (diff.y > 0)
 	{
 		for (int i = 0; i < cells.size(); i++)
-			cells[i].push_back(Cell(sf::Vector2f(pos.x + i * 11, pos.y + 11 * cells[i].size())));
+			cells[i].push_back(Cell(sf::Vector2f(position.x + i * 11, position.y + 11 * cells[i].size())));
 		diff.y--;
 	}
 	reset_lifespan();
@@ -86,86 +122,44 @@ void CellMatrix::check_clicked(sf::Event::MouseButtonEvent mouse)
 
 bool CellMatrix::step()
 {
-	int** n;
-	n = new int* [cells.size()];
-	for (int i = 0; i < cells.size(); i++)
-	{
-		n[i] = new int[cells[0].size()];
-		for (int j = 0; j < cells[0].size(); j++)
-			n[i][j] = 0;
-	}
+	std::vector<std::vector<int>> neighbours = calculate_neighbours();
+	int changed_cells = 0;
 	for (int i = 0; i < cells.size(); i++)
 	{
 		for (int j = 0; j < cells[0].size(); j++)
 		{
 			if (cells[i][j].state)
 			{
-				if (i < cells.size() - 1)
+				if (!life.count(neighbours[i][j]))
 				{
-					n[i + 1][j]++;
+					cells[i][j].click();
+					lifespan[i][j] = 0;
+					changed_cells++;
+					continue;
 				}
-				if (j < cells[0].size() - 1)
-				{
-					n[i][j + 1]++;
-					if (i < cells.size() - 1)
-					{
-						n[i + 1][j + 1]++;
-					}
-				}
-				if (i - 1 >= 0)
-				{
-					n[i - 1][j]++;
-				}
-				if (j - 1 >= 0)
-				{
-					n[i][j - 1]++;
-					if (i - 1 >= 0)
-					{
-						n[i - 1][j - 1]++;
-					}
-				}
-				if (i < cells.size() - 1 && j - 1 >= 0)
-				{
-					n[i + 1][j - 1]++;
-				}
-				if (j < cells[0].size() - 1 && i - 1 >= 0)
-				{
-					n[i - 1][j + 1]++;
-				}
-			}
-		}
-	}
-	for (int i = 0; i < cells.size(); i++)
-	{
-		for (int j = 0; j < cells[0].size(); j++)
-		{
-			if (cells[i][j].state)
-			{
 				lifespan[i][j]++;
 				if (color)
-					cells[i][j].set_color((lifespan[i][j] - 1) % 12);
-				if (!live.count(n[i][j]))
-					cells[i][j].click();
+				{
+					cells[i][j].next_color();
+				}
 			}
 			else
 			{
-				lifespan[i][j] = 0;
-				if (resp.count(n[i][j]))
+				if (resp.count(neighbours[i][j]))
+				{
 					cells[i][j].click();
+					changed_cells++;
+				}
 			}
 		}
 	}
-	if (last_cells == cells)
-		return 0;
-	last_cells = cells;
-	delete[] n;
-	generation++;
-	return 1;
+	generation_counter++;
+	return (changed_cells != 0);
 }
 
 void CellMatrix::clear()
 {
-	generation = 0;
+	generation_counter = 0;
 	for (int i = 0; i < cells.size(); i++)
 	{
 		for (int j = 0; j < cells[0].size(); j++)
@@ -180,7 +174,7 @@ void CellMatrix::clear()
 void CellMatrix::random()
 {
 	srand(time(NULL));
-	this->clear();
+	clear();
 	for (int i = 0; i < cells.size(); i++)
 	{
 		for (int j = 0; j < cells[0].size(); j++)
@@ -203,7 +197,7 @@ void CellMatrix::colors(bool state)
 			for (int j = 0; j < cells[0].size(); j++)
 			{
 				if (cells[i][j].state)
-					cells[i][j].set_color(-1);
+					cells[i][j].reset_color();
 			}
 		}
 	}

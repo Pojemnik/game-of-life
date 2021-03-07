@@ -12,6 +12,7 @@ Cell::Cell(sf::Vector2f pos)
 	rect.setFillColor(sf::Color::White);
 	rect.setOutlineThickness(-1);
 	rect.setOutlineColor(sf::Color::Black);
+	current_color = colors.begin();
 }
 
 void Cell::click()
@@ -29,15 +30,19 @@ void Cell::click()
 	}
 }
 
-void Cell::set_color(int color)
+void Cell::next_color()
 {
-	if (color == -1)
-		rect.setFillColor(sf::Color::Black);
-	else
+	if (++current_color == colors.end())
 	{
-		if (color > -1 && color < 12)
-			rect.setFillColor(colors[color]);
+		current_color = colors.begin();
 	}
+	rect.setFillColor(*current_color);
+}
+
+void Cell::reset_color()
+{
+	current_color = colors.begin();
+	rect.setFillColor(sf::Color::Black);
 }
 
 bool operator ==(const Cell& a, const Cell& b)
