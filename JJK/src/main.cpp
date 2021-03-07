@@ -98,19 +98,19 @@ int main()
 						it->click();
 						if (name == "removeX")
 						{
-							matrix.change_size(-1, 0);
+							matrix.change_size(sf::Vector2i(-1, 0));
 						}
 						else if (name == "addX")
 						{
-							matrix.change_size(1, 0);
+							matrix.change_size(sf::Vector2i(1, 0));
 						}
 						else if (name == "addY")
 						{
-							matrix.change_size(0, 1);
+							matrix.change_size(sf::Vector2i(0, 1));
 						}
 						else if (name == "removeY")
 						{
-							matrix.change_size(0, -1);
+							matrix.change_size(sf::Vector2i(0, -1));
 						}
 						else if (name == "start")
 						{

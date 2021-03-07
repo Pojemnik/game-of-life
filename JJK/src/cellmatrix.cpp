@@ -7,85 +7,61 @@ CellMatrix::CellMatrix(sf::Vector2f p, int x, int y) : pos(p)
 	live.insert(2);
 	live.insert(3);
 	cells.resize(x);
-	lifespan = new int* [x];
+	std::vector<int> temp(y, 0);
 	for (int i = 0; i < x; i++)
 	{
-		lifespan[i] = new int[y];
+		lifespan.push_back(temp);
 		for (int j = 0; j < y; j++)
 		{
 			cells[i].push_back(Cell(sf::Vector2f(pos.x + 11 * i, pos.y + 11 * j)));
-			lifespan[i][j] = 0;
 		}
 	}
-	gen = 0;
+	generation = 0;
 }
 
-void CellMatrix::change_size(int x, int y)
+void CellMatrix::change_size(sf::Vector2i diff)
 {
-	if (cells.size() + x > 35 || cells[0].size() + y > 35 ||
-		cells.size() + x < 5 || cells[0].size() + y < 5)
+	if (cells.size() + diff.x > MAX_SIZE.x || cells[0].size() + diff.y > MAX_SIZE.y ||
+		cells.size() + diff.x < MIN_SIZE.x || cells[0].size() + diff.y < MIN_SIZE.y)
 		return;
-	delete[] lifespan;
-	int a = x;
-	int b = y;
-	while (a > 0)
+	while (diff.x > 0)
 	{
 		std::vector<Cell> temp;
 		for (int i = 0; i < cells[0].size(); i++)
 			temp.push_back(Cell(sf::Vector2f(pos.x + cells.size() * 11, pos.y + 11 * i)));
 		cells.push_back(temp);
-		a--;
+		diff.x--;
 	}
-	/*while (a < 0)
+	while (diff.x < 0)
 	{
-		int x = cells[0].size();
-		for (int i = 0; i < x; i++)
-		{
-			std::vector<sf::Drawable*>::iterator it = vect.begin();
-			while (it != vect.end())
-			{
-				if (*it == cells[cells.size() - 1][i].rect)
-				{
-					vect.erase(it);
-					break;
-				}
-				it++;
-			}
-		}
 		cells.pop_back();
-		a++;
-	}*/
-	/*while (b < 0)
+		diff.x++;
+	}
+	while (diff.y < 0)
 	{
 		int x = cells.size();
 		for (int i = 0; i < x; i++)
 		{
-			std::vector<sf::Drawable*>::iterator it = vect.begin();
-			while (it != vect.end())
-			{
-				if (*it == cells[i][cells[i].size() - 1].rect)
-				{
-					vect.erase(it);
-					break;
-				}
-				it++;
-			}
 			cells[i].pop_back();
 		}
-		b++;
-	}*/
-	while (b > 0)
+		diff.y++;
+	}
+	while (diff.y > 0)
 	{
 		for (int i = 0; i < cells.size(); i++)
 			cells[i].push_back(Cell(sf::Vector2f(pos.x + i * 11, pos.y + 11 * cells[i].size())));
-		b--;
+		diff.y--;
 	}
-	lifespan = new int* [cells.size()];
+	reset_lifespan();
+}
+
+void CellMatrix::reset_lifespan()
+{
+	lifespan.clear();
+	std::vector<int> temp(cells[0].size(), 0);
 	for (int i = 0; i < cells.size(); i++)
 	{
-		lifespan[i] = new int[cells[0].size()];
-		for (int j = 0; j < cells[0].size(); j++)
-			lifespan[i][j] = 0;
+		lifespan.push_back(temp);
 	}
 }
 
@@ -183,14 +159,13 @@ bool CellMatrix::step()
 		return 0;
 	last_cells = cells;
 	delete[] n;
-	gen++;
+	generation++;
 	return 1;
 }
 
 void CellMatrix::clear()
 {
-	delete[] lifespan;
-	gen = 0;
+	generation = 0;
 	for (int i = 0; i < cells.size(); i++)
 	{
 		for (int j = 0; j < cells[0].size(); j++)
@@ -199,13 +174,7 @@ void CellMatrix::clear()
 				cells[i][j].click();
 		}
 	}
-	lifespan = new int* [cells.size()];
-	for (int i = 0; i < cells.size(); i++)
-	{
-		lifespan[i] = new int[cells[0].size()];
-		for (int j = 0; j < cells[0].size(); j++)
-			lifespan[i][j] = 0;
-	}
+	reset_lifespan();
 }
 
 void CellMatrix::random()
