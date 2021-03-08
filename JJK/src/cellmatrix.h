@@ -17,15 +17,16 @@ private:
 	const sf::Vector2i MIN_SIZE = sf::Vector2i(5, 5);
 	const int DEFAULT_RESP_VALUES[1] = { 3 };
 	const int DEFAULT_LIFE_VALUES[2] = { 2,3 };
+	int generation_counter;
 
 	std::vector<std::vector<int>> calculate_neighbours();
 
 public:
 	std::set<int> resp;
 	std::set<int> life;
-	int generation_counter;
 
 	CellMatrix(sf::Vector2f position_, sf::Vector2i size);
+	int get_generation_number() const;
 	void change_size(sf::Vector2i diff);
 	void reset_lifespan();
 	void check_clicked(sf::Event::MouseButtonEvent mouse);

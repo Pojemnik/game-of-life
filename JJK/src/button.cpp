@@ -42,6 +42,7 @@ void Button::update(float dt, sf::Vector2i mouse_pos)
 		{
 			state = Clickable_state::HIGHLIGHTED;
 			rect.setFillColor(HIGHLIGHT_COLOR);
+			text.setFillColor(sf::Color::Black);
 		}
 	}
 	else
@@ -50,6 +51,7 @@ void Button::update(float dt, sf::Vector2i mouse_pos)
 		{
 			state = Clickable_state::DEFAULT;
 			rect.setFillColor(sf::Color::White);
+			text.setFillColor(sf::Color::Black);
 		}
 	}
 	if (state == Clickable_state::CLICKING)
@@ -59,6 +61,8 @@ void Button::update(float dt, sf::Vector2i mouse_pos)
 		{
 			timer = 0;
 			state = Clickable_state::DEFAULT;
+			rect.setFillColor(sf::Color::White);
+			text.setFillColor(sf::Color::Black);
 		}
 	}
 }

@@ -15,10 +15,35 @@
 
 const int DEFAULT_SPEED = 10;
 const sf::Vector2u WINDOW_SIZE = sf::Vector2u(640, 450);
+const int MIN_SPEED = 1;
+const int MAX_SPEED = 20;
 
-void on_remove_x(CellMatrix* matrix)
+void change_speed(int* speed, Label* speed_label, int speed_change)
 {
-	matrix->change_size(sf::Vector2i(-1, 0));
+	*speed += speed_change;
+	if (*speed > MAX_SPEED)
+	{
+		*speed = MAX_SPEED;
+	}
+	if (*speed < MIN_SPEED)
+	{
+		*speed = MIN_SPEED;
+	}
+	speed_label->set_string("Speed: " + std::to_string(*speed));
+}
+
+void stop(bool* go, CellMatrix* matrix, Label* generation_label)
+{
+	*go = false;
+	matrix->clear();
+	generation_label->set_string("Generation: 0");
+}
+
+void step(bool* go, CellMatrix* matrix, Label* generation_label)
+{
+	if (!matrix->step())
+		*go = 0;
+	generation_label->set_string("Generation: " + std::to_string(matrix->get_generation_number()));
 }
 
 int main()
@@ -45,21 +70,32 @@ int main()
 	drawables.push_back(&resp_text);
 	Label color_text = Label(sf::Vector2f(10, 390), "Color:", 20, font);
 	drawables.push_back(&color_text);
-	Label gen_text = Label(sf::Vector2f(10, 350), "Generation: " + std::to_string(matrix.generation_counter), 15, font);
+	Label gen_text = Label(sf::Vector2f(10, 350), "Generation: 0", 15, font);
 	drawables.push_back(&gen_text);
 	check_boxes.push_back(Checkbox(sf::Vector2f(80, 395), false, "color"));
-	buttons.push_back(Button(sf::Vector2f(250, 10), sf::Vector2f(30, 30), L"-", font, sf::Vector2f(-1, -3)));
-	buttons.back().add_click_listener(std::bind(&on_remove_x, &matrix));
-	//buttons.push_back(Button(sf::Vector2f(310, 10), sf::Vector2f(30, 30), L"+", "addX", font, sf::Vector2i(-1, 0)));
-	//buttons.push_back(Button(sf::Vector2f(200, 60), sf::Vector2f(30, 30), L"-", "removeY", font, sf::Vector2i(-1, -3)));
-	//buttons.push_back(Button(sf::Vector2f(200, 120), sf::Vector2f(30, 30), L"+", "addY", font, sf::Vector2i(-1, 0)));
-	//buttons.push_back(Button(sf::Vector2f(10, 140), sf::Vector2f(30, 30), L"-", "remove_speed", font, sf::Vector2i(-1, -3)));
-	//buttons.push_back(Button(sf::Vector2f(70, 140), sf::Vector2f(30, 30), L"+", "add_speed", font, sf::Vector2i(-1, 0)));
-	//buttons.push_back(Button(sf::Vector2f(10, 10), sf::Vector2f(40, 40), L"▶", "start", font));
-	//buttons.push_back(Button(sf::Vector2f(50, 10), sf::Vector2f(40, 40), L"■", "stop", font, sf::Vector2i(-1, 0)));
-	//buttons.push_back(Button(sf::Vector2f(90, 10), sf::Vector2f(40, 40), L"▌▌", "pause", font, sf::Vector2i(7, 9)));
-	//buttons.push_back(Button(sf::Vector2f(130, 10), sf::Vector2f(40, 40), L"▶▌", "next", font, sf::Vector2i(5, 10)));
-	//buttons.push_back(Button(sf::Vector2f(10, 60), sf::Vector2f(120, 40), L"Random", "rand", font, sf::Vector2i(-3, 3)));
+	buttons.reserve(12);
+	buttons.emplace_back(sf::Vector2f(250, 10), sf::Vector2f(30, 30), L"-", font, sf::Vector2f(-1, -3));
+	buttons.back().add_click_listener(std::bind([&matrix]() {matrix.change_size(sf::Vector2i(-1, 0)); }));
+	buttons.emplace_back(sf::Vector2f(310, 10), sf::Vector2f(30, 30), L"+", font, sf::Vector2f(-1, 0));
+	buttons.back().add_click_listener(std::bind([&matrix]() {matrix.change_size(sf::Vector2i(1, 0)); }));
+	buttons.emplace_back(sf::Vector2f(200, 60), sf::Vector2f(30, 30), L"-", font, sf::Vector2f(-1, -3));
+	buttons.back().add_click_listener(std::bind([&matrix]() {matrix.change_size(sf::Vector2i(0, -1)); }));
+	buttons.emplace_back(sf::Vector2f(200, 120), sf::Vector2f(30, 30), L"+", font, sf::Vector2f(-1, 0));
+	buttons.back().add_click_listener(std::bind([&matrix]() {matrix.change_size(sf::Vector2i(0, 1)); }));
+	buttons.emplace_back(sf::Vector2f(10, 140), sf::Vector2f(30, 30), L"-", font, sf::Vector2f(-1, -3));
+	buttons.back().add_click_listener(std::bind(&change_speed, &speed, &speed_text, -1));
+	buttons.emplace_back(sf::Vector2f(70, 140), sf::Vector2f(30, 30), L"+", font, sf::Vector2f(-1, 0));
+	buttons.back().add_click_listener(std::bind(&change_speed, &speed, &speed_text, 1));
+	buttons.emplace_back(sf::Vector2f(10, 10), sf::Vector2f(40, 40), L"▶", font);
+	buttons.back().add_click_listener(std::bind([&go]() {go = true; }));
+	buttons.emplace_back(sf::Vector2f(50, 10), sf::Vector2f(40, 40), L"■", font, sf::Vector2f(-1, 0));
+	buttons.back().add_click_listener(std::bind(&stop, &go, &matrix, &gen_text));
+	buttons.emplace_back(sf::Vector2f(90, 10), sf::Vector2f(40, 40), L"▌▌", font, sf::Vector2f(7, 9));
+	buttons.back().add_click_listener(std::bind([&go]() {go = false; }));
+	buttons.emplace_back(sf::Vector2f(130, 10), sf::Vector2f(40, 40), L"▶▌", font, sf::Vector2f(5, 10));
+	buttons.back().add_click_listener(std::bind(&step, &go, &matrix, &gen_text));
+	buttons.emplace_back(sf::Vector2f(10, 60), sf::Vector2f(120, 40), L"Random", font, sf::Vector2f(-3, 3));
+	buttons.back().add_click_listener(std::bind([&matrix]() {matrix.random(); }));
 	const int LINE_X = 180;
 	sf::VertexBuffer line(sf::PrimitiveType::Lines, sf::VertexBuffer::Usage::Static);
 	line.create(2);
@@ -100,64 +136,6 @@ int main()
 				for (auto& it : buttons)
 				{
 					it.click({ event.mouseButton.x, event.mouseButton.y });
-					/*if (event.mouseButton.x > it->position.x && event.mouseButton.x < it->position.x + it->size.x &&
-						event.mouseButton.y > it->position.y && event.mouseButton.y < it->position.y + it->size.y)
-					{
-						std::string name = it->name;
-						it->click();
-						if (name == "removeX")
-						{
-							
-						}
-						else if (name == "addX")
-						{
-							matrix.change_size(sf::Vector2i(1, 0));
-						}
-						else if (name == "addY")
-						{
-							matrix.change_size(sf::Vector2i(0, 1));
-						}
-						else if (name == "removeY")
-						{
-							matrix.change_size(sf::Vector2i(0, -1));
-						}
-						else if (name == "start")
-						{
-							go = true;
-						}
-						else if (name == "pause")
-						{
-							go = false;
-						}
-						else if (name == "stop")
-						{
-							go = false;
-							matrix.clear();
-							gen_text.set_string("Generation: " + std::to_string(matrix.generation_counter));
-						}
-						else if (name == "rand")
-						{
-							matrix.random();
-						}
-						else if (name == "add_speed")
-						{
-							if (++speed > 20)
-								speed--;
-							speed_text.set_string("Speed: " + std::to_string(speed));
-						}
-						else if (name == "remove_speed")
-						{
-							if (--speed < 1)
-								speed++;
-							speed_text.set_string("Speed: " + std::to_string(speed));
-						}
-						else if (name == "next")
-						{
-							if (!matrix.step())
-								go = 0;
-							gen_text.set_string("Generation: " + std::to_string(matrix.generation_counter));
-						}
-					}*/
 				}
 				for (std::vector<Checkbox>::iterator it = check_boxes.begin(); it != check_boxes.end(); it++)
 				{
@@ -191,18 +169,19 @@ int main()
 				matrix.check_clicked(event.mouseButton);
 			}
 		}
-		time_sum += clock.getElapsedTime().asMilliseconds();
-		if (go && time_sum >= 1000 / speed)
+		time_sum += clock.getElapsedTime().asMicroseconds() / 1000.0;
+		if (go && time_sum >= 1000.f / speed)
 		{
 			if (!matrix.step())
 				go = 0;
-			gen_text.set_string("Generation: " + std::to_string(matrix.generation_counter));
-			time_sum -= 1000 / speed;
+			gen_text.set_string("Generation: " + std::to_string(matrix.get_generation_number()));
+			time_sum -= 1000.f / speed;
 		}
 		for (auto& it : buttons)
 		{
-			it.update(clock.getElapsedTime().asMilliseconds() / 1000, sf::Mouse::getPosition(window));
+			it.update(clock.getElapsedTime().asMicroseconds() / 1000000.0, sf::Mouse::getPosition(window));
 		}
+		clock.restart();
 		//Drawing
 		window.clear(sf::Color::White);
 		for (const auto& it : drawables)
@@ -210,10 +189,6 @@ int main()
 			window.draw(*it, sf::RenderStates());
 		}
 		window.display();
-		/*for (std::vector<Button>::iterator it = buttons.begin(); it != buttons.end(); it++)
-		{
-			it->reset();
-		}*/
 	}
 	return 0;
 }

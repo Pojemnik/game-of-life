@@ -55,6 +55,11 @@ CellMatrix::CellMatrix(sf::Vector2f position_, sf::Vector2i size) : position(pos
 	}
 }
 
+int CellMatrix::get_generation_number() const
+{
+	return generation_counter;
+}
+
 void CellMatrix::change_size(sf::Vector2i diff)
 {
 	if (cells.size() + diff.x > MAX_SIZE.x || cells[0].size() + diff.y > MAX_SIZE.y ||
