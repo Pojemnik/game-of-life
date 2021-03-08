@@ -23,6 +23,7 @@
     <ClCompile Include="src\cell.cpp" />
     <ClCompile Include="src\cellmatrix.cpp" />
     <ClCompile Include="src\checkbox.cpp" />
+    <ClCompile Include="src\clickable.cpp" />
     <ClCompile Include="src\label.cpp" />
     <ClCompile Include="src\main.cpp" />
   </ItemGroup>
@@ -31,6 +32,7 @@
     <ClInclude Include="src\cell.h" />
     <ClInclude Include="src\cellmatrix.h" />
     <ClInclude Include="src\checkbox.h" />
+    <ClInclude Include="src\clickable.h" />
     <ClInclude Include="src\label.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
