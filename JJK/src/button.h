@@ -11,9 +11,9 @@ private:
 	sf::Text text;
 	Clickable_state state = Clickable_state::DEFAULT;
 	float timer = 0;
-	const float CLICK_TIME = 0.2f;
-	const sf::Color CLICK_COLOR = sf::Color(102, 178, 255, 255);
-	const sf::Color HIGHLIGHT_COLOR = sf::Color(200, 200, 200, 255);
+	static const float CLICK_TIME;
+	static const sf::Color CLICK_COLOR;
+	static const sf::Color HIGHLIGHT_COLOR;
 	void on_click();
 
 public:

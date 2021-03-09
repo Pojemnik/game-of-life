@@ -1,5 +1,9 @@
 ﻿#include "button.h"
 
+const float Button::CLICK_TIME = 0.2f;
+const sf::Color Button::CLICK_COLOR = sf::Color(102, 178, 255, 255);
+const sf::Color Button::HIGHLIGHT_COLOR = sf::Color(200, 200, 200, 255);
+
 void Button::on_click()
 {
 	state = Clickable_state::CLICKING;

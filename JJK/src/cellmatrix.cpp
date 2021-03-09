@@ -38,11 +38,11 @@ CellMatrix::CellMatrix(sf::Vector2f position_, sf::Vector2i size) : position(pos
 {
 	for (const auto& it : DEFAULT_RESP_VALUES)
 	{
-		resp.insert(it);
+		set_simulation_rule(Simulation_rule::RESPAWN, it, true);
 	}
 	for (const auto& it : DEFAULT_LIFE_VALUES)
 	{
-		life.insert(it);
+		set_simulation_rule(Simulation_rule::LIVING, it, true);
 	}
 	std::vector<int> temp(size.y, 0);
 	for (int i = 0; i < size.x; i++)
@@ -135,7 +135,7 @@ bool CellMatrix::step()
 		{
 			if (cells[i][j].state)
 			{
-				if (!life.count(neighbours[i][j]))
+				if (!rules[static_cast<int>(Simulation_rule::LIVING)].count(neighbours[i][j]))
 				{
 					cells[i][j].click();
 					lifespan[i][j] = 0;
@@ -150,7 +150,7 @@ bool CellMatrix::step()
 			}
 			else
 			{
-				if (resp.count(neighbours[i][j]))
+				if (rules[static_cast<int>(Simulation_rule::RESPAWN)].count(neighbours[i][j]))
 				{
 					cells[i][j].click();
 					changed_cells++;
@@ -205,6 +205,18 @@ void CellMatrix::colors(bool state)
 					cells[i][j].reset_color();
 			}
 		}
+	}
+}
+
+void CellMatrix::set_simulation_rule(Simulation_rule rule, int neighbours, bool value)
+{
+	if (value)
+	{
+		rules[static_cast<int>(rule)].insert(neighbours);
+	}
+	else
+	{
+		rules[static_cast<int>(rule)].erase(neighbours);
 	}
 }
 

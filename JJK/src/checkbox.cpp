@@ -1,39 +1,67 @@
 #include "checkbox.h"
 
-Checkbox::Checkbox(sf::Vector2f position_, bool checked_, std::string name_) : position(position_), checked(checked_), name(name_)
+const sf::Vector2f Checkbox::SIZE = sf::Vector2f(15, 15);
+const sf::Color Checkbox::CHECKED_COLOR = sf::Color::Black;
+const sf::Color Checkbox::HIGHLIGHTED_COLOR = sf::Color(200, 200, 200, 255);
+const sf::Color Checkbox::UNCHECKED_COLOR = sf::Color::White;
+
+void Checkbox::set_checked_state_color(bool new_state)
 {
-	rect.setPosition(position);
-	rect.setSize(sf::Vector2f(15, 15));
-	size = sf::Vector2f(15, 15);
-	if (checked_)
+	if (new_state)
 	{
-		rect.setFillColor(sf::Color(0, 0, 0, 255));
+		rect.setFillColor(CHECKED_COLOR);
 	}
 	else
 	{
-		rect.setFillColor(sf::Color(255, 255, 255, 255));
-		rect.setOutlineThickness(-1);
-		rect.setOutlineColor(sf::Color(0, 0, 0, 255));
+		rect.setFillColor(UNCHECKED_COLOR);
 	}
 }
 
-bool Checkbox::click()
+Checkbox::Checkbox(sf::Vector2f position_, bool default_state) : Clickable(position_, SIZE), checked(default_state)
 {
-	checked = !checked;
-	if (checked)
+	rect.setPosition(position_);
+	rect.setSize(SIZE);
+	rect.setOutlineThickness(-1);
+	rect.setOutlineColor(sf::Color::Black);
+	set_checked_state_color(default_state);
+}
+
+void Checkbox::click(sf::Vector2i mouse_pos)
+{
+	if (active_zone_contains_point(mouse_pos))
 	{
-		rect.setFillColor(sf::Color(0, 0, 0, 255));
+		checked = !checked;
+		set_checked_state_color(checked);
+		broadcast_swich(checked);
 	}
-	else
-	{
-		rect.setFillColor(sf::Color(255, 255, 255, 255));
-		rect.setOutlineThickness(-1);
-		rect.setOutlineColor(sf::Color(0, 0, 0, 255));
-	}
-	return checked;
 }
 
 void Checkbox::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
 	target.draw(rect, states);
+}
+
+bool Checkbox::get_check_state() const
+{
+	return checked;
+}
+
+void Checkbox::update(float dt, sf::Vector2i mouse_pos)
+{
+	if (active_zone_contains_point(mouse_pos))
+	{
+		if (state == Clickable_state::DEFAULT)
+		{
+			state = Clickable_state::HIGHLIGHTED;
+			rect.setFillColor(HIGHLIGHTED_COLOR);
+		}
+	}
+	else
+	{
+		if (state == Clickable_state::HIGHLIGHTED)
+		{
+			state = Clickable_state::DEFAULT;
+			set_checked_state_color(checked);
+		}
+	}
 }

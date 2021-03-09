@@ -78,7 +78,8 @@ int main()
 	drawables.push_back(&color_text);
 	Label gen_text = Label(sf::Vector2f(10, 350), "Generation: 0", 15, font);
 	drawables.push_back(&gen_text);
-	check_boxes.push_back(Checkbox(sf::Vector2f(80, 395), false, "color"));
+	check_boxes.push_back(Checkbox(sf::Vector2f(80, 395), false));
+	check_boxes.back().add_switch_listener([&matrix](bool state) {matrix.colors(state); });
 	buttons.reserve(12);
 	buttons.emplace_back(sf::Vector2f(250, 10), sf::Vector2f(30, 30), L"-", font, sf::Vector2f(-1, -3));
 	buttons.back().add_click_listener(std::bind([&matrix]() {matrix.change_size(sf::Vector2i(-1, 0)); }));
@@ -108,7 +109,7 @@ int main()
 	std::vector<sf::Vertex> vertices = { sf::Vertex(sf::Vector2f(LINE_X, 0), sf::Color::Black),  sf::Vertex(sf::Vector2f(LINE_X, WINDOW_SIZE.y), sf::Color::Black), };
 	line.update(vertices.data());
 	drawables.push_back(&line);
-	for (int i = 0; i <= 8; i++)
+	/*for (int i = 0; i <= 8; i++)
 	{
 		check_boxes.push_back(Checkbox(sf::Vector2f(10 + i * 15, 255), false, "life" + std::to_string(i)));
 		drawables.push_back(new Label(sf::Vector2f(13 + i * 15, 240), std::to_string(i), 14, font));
@@ -121,7 +122,7 @@ int main()
 		drawables.push_back(new Label(sf::Vector2f(13 + i * 15, 300), std::to_string(i), 14, font));
 		if (i == 3)
 			check_boxes.back().click();
-	}
+	}*/
 	for (const auto& it : buttons)
 	{
 		drawables.push_back(&it);
@@ -139,13 +140,15 @@ int main()
 				window.close();
 			if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
 			{
+				sf::Vector2i mouse_pos = { event.mouseButton.x, event.mouseButton.y };
 				for (auto& it : buttons)
 				{
-					it.click({ event.mouseButton.x, event.mouseButton.y });
+					it.click(mouse_pos);
 				}
-				for (std::vector<Checkbox>::iterator it = check_boxes.begin(); it != check_boxes.end(); it++)
+				for (auto& it : check_boxes)
 				{
-					if (event.mouseButton.x > it->position.x && event.mouseButton.x < it->position.x + it->size.x &&
+					it.click(mouse_pos);
+					/*if (event.mouseButton.x > it->position.x && event.mouseButton.x < it->position.x + it->size.x &&
 						event.mouseButton.y > it->position.y && event.mouseButton.y < it->position.y + it->size.y)
 					{
 						if (it->click())
@@ -170,7 +173,7 @@ int main()
 								matrix.colors(false);
 							}
 						}
-					}
+					}*/
 				}
 				matrix.check_clicked(event.mouseButton);
 			}

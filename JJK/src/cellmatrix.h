@@ -18,12 +18,16 @@ private:
 	const int DEFAULT_RESP_VALUES[1] = { 3 };
 	const int DEFAULT_LIFE_VALUES[2] = { 2,3 };
 	int generation_counter;
+	std::array<std::set<int>, 2> rules;
 
 	std::vector<std::vector<int>> calculate_neighbours();
 
 public:
-	std::set<int> resp;
-	std::set<int> life;
+	enum class Simulation_rule
+	{
+		RESPAWN = 0,
+		LIVING
+	};
 
 	CellMatrix(sf::Vector2f position_, sf::Vector2i size);
 	int get_generation_number() const;
@@ -34,5 +38,6 @@ public:
 	void clear();
 	void random();
 	void colors(bool state);
+	void set_simulation_rule(Simulation_rule rule, int neighbours, bool value);
 	virtual void draw(sf::RenderTarget& target, sf::RenderStates states) const;
 };
