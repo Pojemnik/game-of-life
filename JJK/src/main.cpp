@@ -109,20 +109,18 @@ int main()
 	std::vector<sf::Vertex> vertices = { sf::Vertex(sf::Vector2f(LINE_X, 0), sf::Color::Black),  sf::Vertex(sf::Vector2f(LINE_X, WINDOW_SIZE.y), sf::Color::Black), };
 	line.update(vertices.data());
 	drawables.push_back(&line);
-	/*for (int i = 0; i <= 8; i++)
+	for (int i = 0; i <= 8; i++)
 	{
-		check_boxes.push_back(Checkbox(sf::Vector2f(10 + i * 15, 255), false, "life" + std::to_string(i)));
+		check_boxes.push_back(Checkbox(sf::Vector2f(10 + i * 15, 255), (i == 2 || i == 3)));
+		check_boxes.back().add_switch_listener([&matrix, i](bool state) {matrix.set_simulation_rule(CellMatrix::Simulation_rule::LIVING, i, state); });
 		drawables.push_back(new Label(sf::Vector2f(13 + i * 15, 240), std::to_string(i), 14, font));
-		if (i == 2 || i == 3)
-			check_boxes.back().click();
 	}
 	for (int i = 0; i <= 8; i++)
 	{
-		check_boxes.push_back(Checkbox(sf::Vector2f(10 + i * 15, 315), false, "resp" + std::to_string(i)));
+		check_boxes.push_back(Checkbox(sf::Vector2f(10 + i * 15, 315), (i == 3)));
+		check_boxes.back().add_switch_listener([&matrix, i](bool state) {matrix.set_simulation_rule(CellMatrix::Simulation_rule::RESPAWN, i, state); });
 		drawables.push_back(new Label(sf::Vector2f(13 + i * 15, 300), std::to_string(i), 14, font));
-		if (i == 3)
-			check_boxes.back().click();
-	}*/
+	}
 	for (const auto& it : buttons)
 	{
 		drawables.push_back(&it);
@@ -148,32 +146,6 @@ int main()
 				for (auto& it : check_boxes)
 				{
 					it.click(mouse_pos);
-					/*if (event.mouseButton.x > it->position.x && event.mouseButton.x < it->position.x + it->size.x &&
-						event.mouseButton.y > it->position.y && event.mouseButton.y < it->position.y + it->size.y)
-					{
-						if (it->click())
-						{
-							if (it->name.substr(0, 4) == "life")
-								matrix.life.insert(it->name[4] - '0');
-							else if (it->name.substr(0, 4) == "resp")
-								matrix.resp.insert(it->name[4] - '0');
-							else if (it->name == "color")
-							{
-								matrix.colors(true);
-							}
-						}
-						else
-						{
-							if (it->name.substr(0, 4) == "life")
-								matrix.life.erase(it->name[4] - '0');
-							else if (it->name.substr(0, 4) == "resp")
-								matrix.resp.erase(it->name[4] - '0');
-							else if (it->name == "color")
-							{
-								matrix.colors(false);
-							}
-						}
-					}*/
 				}
 				matrix.check_clicked(event.mouseButton);
 			}
