@@ -46,6 +46,12 @@ void step(bool* go, CellMatrix* matrix, Label* generation_label)
 	generation_label->set_string("Generation: " + std::to_string(matrix->get_generation_number()));
 }
 
+void start(bool* go, sf::Clock* clock)
+{
+	*go = true;
+	clock->restart();
+}
+
 int main()
 {
 	sf::Font font;
@@ -87,7 +93,7 @@ int main()
 	buttons.emplace_back(sf::Vector2f(70, 140), sf::Vector2f(30, 30), L"+", font, sf::Vector2f(-1, 0));
 	buttons.back().add_click_listener(std::bind(&change_speed, &speed, &speed_text, 1));
 	buttons.emplace_back(sf::Vector2f(10, 10), sf::Vector2f(40, 40), L"▶", font);
-	buttons.back().add_click_listener(std::bind([&go]() {go = true; }));
+	buttons.back().add_click_listener(std::bind(&start, &go, &clock));
 	buttons.emplace_back(sf::Vector2f(50, 10), sf::Vector2f(40, 40), L"■", font, sf::Vector2f(-1, 0));
 	buttons.back().add_click_listener(std::bind(&stop, &go, &matrix, &gen_text));
 	buttons.emplace_back(sf::Vector2f(90, 10), sf::Vector2f(40, 40), L"▌▌", font, sf::Vector2f(7, 9));
@@ -169,13 +175,16 @@ int main()
 				matrix.check_clicked(event.mouseButton);
 			}
 		}
-		time_sum += clock.getElapsedTime().asMicroseconds() / 1000.0;
-		if (go && time_sum >= 1000.f / speed)
+		if (go)
 		{
-			if (!matrix.step())
-				go = 0;
-			gen_text.set_string("Generation: " + std::to_string(matrix.get_generation_number()));
-			time_sum -= 1000.f / speed;
+			time_sum += clock.getElapsedTime().asMicroseconds() / 1000.0;
+			if (time_sum >= 1000.f / speed)
+			{
+				if (!matrix.step())
+					go = 0;
+				gen_text.set_string("Generation: " + std::to_string(matrix.get_generation_number()));
+				time_sum -= 1000.f / speed;
+			}
 		}
 		for (auto& it : buttons)
 		{
