@@ -14,7 +14,7 @@ std::vector<std::vector<int>> CellMatrix::calculate_neighbours()
 	{
 		for (int j = 0; j < cells[0].size(); j++)
 		{
-			if (!cells[i][j].state)
+			if (!cells[i][j].get_state())
 			{
 				continue;
 			}
@@ -53,6 +53,7 @@ CellMatrix::CellMatrix(sf::Vector2f position_, sf::Vector2i size) : position(pos
 			cells[i].push_back(Cell(sf::Vector2f(position.x + 11 * i, position.y + 11 * j)));
 		}
 	}
+	update_rect();
 }
 
 int CellMatrix::get_generation_number() const
@@ -80,10 +81,9 @@ void CellMatrix::change_size(sf::Vector2i diff)
 	}
 	while (diff.y < 0)
 	{
-		int x = cells.size();
-		for (int i = 0; i < x; i++)
+		for (auto& it : cells)
 		{
-			cells[i].pop_back();
+			it.pop_back();
 		}
 		diff.y++;
 	}
@@ -94,6 +94,16 @@ void CellMatrix::change_size(sf::Vector2i diff)
 		diff.y--;
 	}
 	reset_lifespan();
+	update_rect();
+}
+
+void CellMatrix::update_rect()
+{
+	const sf::Vector2f position = { cells[0][0].get_rect().left, cells[0][0].get_rect().top };
+	const sf::FloatRect lower_right_cell = cells.back().back().get_rect();
+	const sf::Vector2f size = sf::Vector2f(lower_right_cell.left, lower_right_cell.top) +
+		sf::Vector2f(lower_right_cell.width, lower_right_cell.height) - position;
+	rect = sf::FloatRect(position, size);
 }
 
 void CellMatrix::reset_lifespan()
@@ -108,18 +118,18 @@ void CellMatrix::reset_lifespan()
 
 void CellMatrix::check_clicked(sf::Event::MouseButtonEvent mouse)
 {
-	if (mouse.x > cells[0][0].rect.getPosition().x && mouse.y > cells[0][0].rect.getPosition().y &&
-		mouse.x < cells[cells.size() - 1][cells[0].size() - 1].rect.getPosition().x + cells[cells.size() - 1][cells[0].size() - 1].rect.getSize().x &&
-		mouse.y < cells[cells.size() - 1][cells[0].size() - 1].rect.getPosition().y + cells[cells.size() - 1][cells[0].size() - 1].rect.getSize().y)
+	sf::FloatRect mouse_rect = sf::FloatRect(sf::Vector2f(mouse.x, mouse.y), { 0.1f, 0.1f });
+	if (rect.intersects(mouse_rect))
 	{
-		for (int i = 0; i < cells.size(); i++)
+		for (auto& row : cells)
 		{
-			for (int j = 0; j < cells[i].size(); j++)
+			for (auto& it : row)
 			{
-				sf::Vector2f p = cells[i][j].rect.getPosition();
-				sf::Vector2f s = cells[i][j].rect.getSize();
-				if (mouse.x > p.x && mouse.x < p.x + s.x && mouse.y > p.y && mouse.y < p.y + s.y)
-					cells[i][j].click();
+				const sf::FloatRect rect = it.get_rect();
+				const sf::Vector2f left_up = sf::Vector2f(rect.left, rect.top);
+				const sf::Vector2f right_bottom = sf::Vector2f(rect.width, rect.height) + left_up;
+				if (mouse.x > left_up.x && mouse.x < right_bottom.x && mouse.y > left_up.y && mouse.y < right_bottom.y)
+					it.change_state();
 			}
 		}
 	}
@@ -133,11 +143,11 @@ bool CellMatrix::step()
 	{
 		for (int j = 0; j < cells[0].size(); j++)
 		{
-			if (cells[i][j].state)
+			if (cells[i][j].get_state())
 			{
 				if (!rules[static_cast<int>(Simulation_rule::LIVING)].count(neighbours[i][j]))
 				{
-					cells[i][j].click();
+					cells[i][j].change_state();
 					lifespan[i][j] = 0;
 					changed_cells++;
 					continue;
@@ -152,7 +162,7 @@ bool CellMatrix::step()
 			{
 				if (rules[static_cast<int>(Simulation_rule::RESPAWN)].count(neighbours[i][j]))
 				{
-					cells[i][j].click();
+					cells[i][j].change_state();
 					changed_cells++;
 				}
 			}
@@ -165,12 +175,12 @@ bool CellMatrix::step()
 void CellMatrix::clear()
 {
 	generation_counter = 0;
-	for (int i = 0; i < cells.size(); i++)
+	for (auto& row : cells)
 	{
-		for (int j = 0; j < cells[0].size(); j++)
+		for (auto& it : row)
 		{
-			if (cells[i][j].state)
-				cells[i][j].click();
+			if (it.get_state())
+				it.change_state();
 		}
 	}
 	reset_lifespan();
@@ -180,13 +190,13 @@ void CellMatrix::random()
 {
 	srand(time(NULL));
 	clear();
-	for (int i = 0; i < cells.size(); i++)
+	for (auto& row : cells)
 	{
-		for (int j = 0; j < cells[0].size(); j++)
+		for (auto& it : row)
 		{
 			if (rand() % 2)
 			{
-				cells[i][j].click();
+				it.change_state();
 			}
 		}
 	}
@@ -197,12 +207,12 @@ void CellMatrix::colors(bool state)
 	color = state;
 	if (!state)
 	{
-		for (int i = 0; i < cells.size(); i++)
+		for (auto& row : cells)
 		{
-			for (int j = 0; j < cells[0].size(); j++)
+			for (auto& it : row)
 			{
-				if (cells[i][j].state)
-					cells[i][j].reset_color();
+				if (it.get_state())
+					it.reset_color();
 			}
 		}
 	}
@@ -222,11 +232,11 @@ void CellMatrix::set_simulation_rule(Simulation_rule rule, int neighbours, bool 
 
 void CellMatrix::draw(sf::RenderTarget& target, sf::RenderStates states) const
 {
-	for (const auto& it : cells)
+	for (auto& row : cells)
 	{
-		for (const auto& it2 : it)
+		for (auto& it : row)
 		{
-			target.draw(it2.rect, states);
+			it.draw(target, states);
 		}
 	}
 }

@@ -97,9 +97,9 @@ int main()
 	buttons.back().add_click_listener(std::bind(&start, &go, &clock));
 	buttons.emplace_back(sf::Vector2f(50, 10), sf::Vector2f(40, 40), L"■", font, sf::Vector2f(-1, 0));
 	buttons.back().add_click_listener(std::bind(&stop, &go, &matrix, &gen_text));
-	buttons.emplace_back(sf::Vector2f(90, 10), sf::Vector2f(40, 40), L"▌▌", font, sf::Vector2f(7, 9));
+	buttons.emplace_back(sf::Vector2f(90, 10), sf::Vector2f(40, 40), L"▌▌", font, sf::Vector2f(3, 7));
 	buttons.back().add_click_listener(std::bind([&go]() {go = false; }));
-	buttons.emplace_back(sf::Vector2f(130, 10), sf::Vector2f(40, 40), L"▶▌", font, sf::Vector2f(5, 10));
+	buttons.emplace_back(sf::Vector2f(130, 10), sf::Vector2f(40, 40), L"▶▌", font, sf::Vector2f(2, 7));
 	buttons.back().add_click_listener(std::bind(&step, &go, &matrix, &gen_text));
 	buttons.emplace_back(sf::Vector2f(10, 60), sf::Vector2f(120, 40), L"Random", font, sf::Vector2f(-3, 3));
 	buttons.back().add_click_listener(std::bind([&matrix]() {matrix.random(); }));

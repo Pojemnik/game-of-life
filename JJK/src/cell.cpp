@@ -15,7 +15,7 @@ Cell::Cell(sf::Vector2f pos)
 	current_color = colors.begin();
 }
 
-void Cell::click()
+void Cell::change_state()
 {
 	state = !state;
 	if (state)
@@ -39,15 +39,30 @@ void Cell::next_color()
 	rect.setFillColor(*current_color);
 }
 
+sf::FloatRect Cell::get_rect() const
+{
+	return rect.getGlobalBounds();
+}
+
 void Cell::reset_color()
 {
 	current_color = colors.begin();
 	rect.setFillColor(sf::Color::Black);
 }
 
+bool Cell::get_state() const
+{
+	return state;
+}
+
+void Cell::draw(sf::RenderTarget& target, sf::RenderStates states) const
+{
+	target.draw(rect, states);
+}
+
 bool operator ==(const Cell& a, const Cell& b)
 {
-	if (b.state == a.state)
+	if (b.get_state() == a.get_state())
 		return true;
 	return false;
 }

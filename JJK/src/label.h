@@ -4,7 +4,6 @@
 
 class Label : public sf::Drawable
 {
-
 private:
 	sf::Text text;
 
