@@ -34,7 +34,7 @@ std::vector<std::vector<int>> CellMatrix::calculate_neighbours()
 }
 
 CellMatrix::CellMatrix(sf::Vector2f position_, sf::Vector2i size) : position(position_),
-	generation_counter(0), color(false), cells(size.x)
+	generation_counter(0), color(false), cells(size.x), random_engine((std::random_device())()), uniform_ints(0, 1)
 {
 	for (const auto& it : DEFAULT_RESP_VALUES)
 	{
@@ -188,13 +188,12 @@ void CellMatrix::clear()
 
 void CellMatrix::random()
 {
-	srand(time(NULL));
 	clear();
 	for (auto& row : cells)
 	{
 		for (auto& it : row)
 		{
-			if (rand() % 2)
+			if (uniform_ints(random_engine) == 1)
 			{
 				it.change_state();
 			}

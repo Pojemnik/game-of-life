@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <set>
+#include <random>
 
 #include "cell.h"
 
@@ -16,6 +17,8 @@ private:
 	int generation_counter;
 	std::array<std::set<int>, 2> rules;
 	sf::FloatRect rect;
+	std::default_random_engine random_engine;
+	std::uniform_int_distribution<int> uniform_ints;
 
 	const sf::Vector2i MAX_SIZE = sf::Vector2i(35, 35);
 	const sf::Vector2i MIN_SIZE = sf::Vector2i(5, 5);

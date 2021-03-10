@@ -1,7 +1,19 @@
 # Game of life
 
+![gif1](docs/gif.gif)
+
 ### About
-The goal of this project is to make an improved version of and older project, which I made back in high school - an implementation of Game of Life. I'm going to refactor the code and maybe add some more features.
+This project is an implementation of The Game of Life cellular automata.
+
+### Features
+- Changing cells number
+- Changing rules of the automata
+- Colors indicating cell's age
+- Generation counter
 
 ### Technologies
 The project uses SFML 2 graphics library
+
+### Screenshots
+![Screenshot 1](docs/ss1.png)
+![Screenshot 2](docs/ss2.png)

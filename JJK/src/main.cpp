@@ -1,12 +1,8 @@
 ﻿#include <SFML/Graphics.hpp>
-#include <cmath>
 #include <vector>
 #include <string>
 #include <iostream>
 #include <set>
-#include <Windows.h>
-#include <cstdlib>
-#include <ctime>
 
 #include "button.h"
 #include "checkbox.h"
@@ -58,7 +54,7 @@ int main()
 	bool go = false;
 	int speed = DEFAULT_SPEED;
 	font.loadFromFile("../lucida.ttf");
-	sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE.x, WINDOW_SIZE.y), "Game of life");
+	sf::RenderWindow window(sf::VideoMode(WINDOW_SIZE.x, WINDOW_SIZE.y), "Game of life", sf::Style::Titlebar | sf::Style::Close);
 	std::vector<const sf::Drawable*> drawables;
 	std::vector<Button> buttons;
 	std::vector<Checkbox> check_boxes;
@@ -166,7 +162,6 @@ int main()
 			it.update(clock.getElapsedTime().asMicroseconds() / 1000000.0, sf::Mouse::getPosition(window));
 		}
 		clock.restart();
-		//Drawing
 		window.clear(sf::Color::White);
 		for (const auto& it : drawables)
 		{
